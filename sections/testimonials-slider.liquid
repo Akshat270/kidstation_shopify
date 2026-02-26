@@ -1,0 +1,388 @@
+{% assign ns = 'tms-' | append: section.id %}
+
+<section class="{{ ns }}-section" data-section-id="{{ section.id }}">
+  <div class="{{ ns }}-container">
+    {% if section.settings.heading != blank %}
+      <h2 class="{{ ns }}-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="{{ ns }}-slider" data-slider>
+      <!-- arrows (desktop only) -->
+      <button class="{{ ns }}-nav {{ ns }}-prev" type="button" aria-label="Previous" hidden>
+        ←
+      </button>
+
+      <!-- track -->
+      <div class="{{ ns }}-track" data-track>
+        {% for block in section.blocks %}
+          {% if block.type == 'testimonial' %}
+            {% assign platform = block.settings.platform | default: 'google' %}
+            <article class="{{ ns }}-item" {{ block.shopify_attributes }}>
+              <div class="{{ ns }}-card">
+                <div class="{{ ns }}-left desktop">
+                  {% if block.settings.photo %}
+                    <img class="{{ ns }}-photo" src="{{ block.settings.photo | img_url: 'master' }}" alt="{{ block.settings.name | escape }}">
+                  {% else %}
+                    <div class="{{ ns }}-photo {{ ns }}-photo--ph">IMG</div>
+                  {% endif %}
+                </div>
+                <div class="{{ ns }}-left mobile">
+                  {% if block.settings.mobile_photo %}
+                    <img class="{{ ns }}-photo" src="{{ block.settings.mobile_photo | img_url: 'master' }}" alt="{{ block.settings.name | escape }}">
+                  {% else %}
+                    <div class="{{ ns }}-photo {{ ns }}-photo--ph">IMG</div>
+                  {% endif %}
+                </div>
+
+                <div class="{{ ns }}-right">
+                  {% if block.settings.title != blank %}
+                    <h3 class="{{ ns }}-title">{{ block.settings.title }}</h3>
+                  {% endif %}
+                  {% if block.settings.body != blank %}
+                    <div class="{{ ns }}-body rte">{{ block.settings.body }}</div>
+                  {% endif %}
+
+                  <div class="{{ ns }}-meta">
+                    <div class="{{ ns }}-reviewer">
+                      {% if block.settings.avatar %}
+                        <img class="{{ ns }}-avatar" src="{{ block.settings.avatar | image_url: width: 100, height: 100, crop: 'center' }}" alt="{{ block.settings.name | escape }}">
+                      {% else %}
+                        {% assign init = block.settings.name | default: 'User' | slice: 0, 1 %}
+                        <div class="{{ ns }}-avatar {{ ns }}-avatar--ph">{{ init }}</div>
+                      {% endif %}
+                      <div class="{{ ns }}-who">
+                        <div class="{{ ns }}-name">{{ block.settings.name }}</div>
+                        {% if block.settings.role != blank %}
+                          <div class="{{ ns }}-role">{{ block.settings.role }}</div>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="{{ ns }}-platform">
+                      {% if platform == 'google' %}
+                        <!-- Google logo -->
+                        <img class="{{ ns }}-logo" src="https://cdn.shopify.com/s/files/1/0813/6782/6712/files/a910d418-7123-4bc4-aa3b-ef7e25e74ae6.60c498c559810aa0-Photoroom_2.webp?v=1758884810" alt="" width="" height="">
+                      {% elsif platform == 'meta' %}
+                        <!-- Meta logo -->
+                        <img class="{{ ns }}-logo" src="https://cdn.shopify.com/s/files/1/0813/6782/6712/files/meta-logo-facebook-new-name-Photoroom_1.webp?v=1758884810" alt="" width="" height="">
+
+                      {% elsif platform == 'amazon' %}
+                        <!-- Amazon logo -->
+                        <img class="{{ ns }}-logo" src="https://cdn.shopify.com/s/files/1/0813/6782/6712/files/Screenshot_2025-10-07_at_4.52.36_pm.webp?v=1759836702" alt="" width="" height="">
+
+                      {% else %}
+                        <!-- Flipkart logo -->
+                        <img class="{{ ns }}-logo" src="https://cdn.shopify.com/s/files/1/0813/6782/6712/files/Screenshot_2025-10-07_at_4.53.20_pm.webp?v=1759836702" alt="" width="" height="">
+                      {% endif %}
+
+                      {%- assign stars = block.settings.rating | default: 5 | plus: 0 | at_least: 0 | at_most: 5 -%}
+                      <div class="{{ ns }}-stars" aria-label="{{ stars }} out of 5">
+                        {%- for s in (1..5) -%}
+                          <svg
+                            class="{{ ns }}-star{% if s <= stars %} is-on{% else %} is-off{% endif %}"
+                            viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
+                            <path d="M10 1.8l2.6 5.3 5.9.9-4.3 4.2 1 5.9L10 15.7l-5.2 2.7 1-5.9-4.3-4.2 5.9-.9L10 1.8z"/>
+                          </svg>
+                        {%- endfor -%}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+       <!-- Mobile-only moving progress thumb -->
+       <div class="nf-progress" aria-hidden="true"></div>
+      <button class="{{ ns }}-nav {{ ns }}-next" type="button" aria-label="Next" hidden>
+       →
+      </button>
+    </div>
+
+    <div class="{{ ns }}-dots" data-dots></div>
+  </div>
+
+  <style>
+  .{{ ns }}-section{padding:40px 0;background:{{ section.settings.bg | default: '#FFF3F3' }}}
+  .{{ ns }}-container{max-width:1300px;margin:0 auto;padding:0}
+  .{{ ns }}-heading{
+    margin:0 0 20px;
+    text-align:center;
+    font-weight:600;line-height:1.15;
+    font-size:clamp(22px,3.2vw,30px);
+    color:#000
+  }
+
+  /* Slider base */
+  :root{--{{ ns }}-gap:28px}
+  .{{ ns }}-slider{position:relative}
+  .{{ ns }}-track{display:flex;gap:var(--{{ ns }}-gap);overflow-x:hidden;scroll-behavior:smooth}
+  .{{ ns }}-item{flex:0 0 calc((100% - var(--{{ ns }}-gap)) / 2)}
+
+  /* Card */
+  .{{ ns }}-card{
+    display:grid;grid-template-columns:1fr 2fr;gap:28px;
+    background:#fff;border-radius:16px;border:1px solid #e8ebf0;
+    {% comment %} box-shadow:0 10px 30px rgba(15,23,42,.08); {% endcomment %}
+    padding:22px
+  }
+  .{{ ns }}-left{border-radius:12px;overflow:hidden;background:#f3f5f8}
+  .{{ ns }}-photo{width:100%;height:100%;min-height:260px;object-fit:cover;display:block}
+  .{{ ns }}-photo--ph{display:grid;place-items:center;color:#99A3AD}
+
+  .{{ ns }}-title{margin:4px 0 12px;font-size:clamp(18px,2.1vw,28px);font-weight:600;color:#0f4264}
+  .{{ ns }}-body{color:#000;opacity:.95;line-height:1.6;margin-bottom:18px;font-size:16px;}
+  .{{ ns }}-meta{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    border-top:1px solid #e9edf3;padding-top:14px
+  }
+  .{{ ns }}-reviewer{display:flex;align-items:center;gap:12px}
+  .{{ ns }}-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#eef2f6}
+  .{{ ns }}-avatar--ph{display:grid;place-items:center;font-weight:800;color:#0f4264}
+  .{{ ns }}-who{line-height:1.2}
+  .{{ ns }}-name{font-weight:800}
+  .{{ ns }}-role{font-size:12px;color:#0f4264}
+  .{{ ns }}-platform{display:flex;flex-direction: column;align-items:center;gap:14px}
+  .{{ ns }}-logo{display:block;width: 80px; height: auto}
+
+  /* Stars — base unfilled, fill only .is-on */
+  .{{ ns }}-stars{display:flex;gap:2px}
+  .{{ ns }}-star path{
+    fill:none;
+    stroke:#E0E6EF;
+    stroke-width:1.4;
+  }
+  .{{ ns }}-star.is-on path{
+    fill:#FDA700;
+    stroke:#FDA700;
+  }
+  /* optional explicit off style */
+  .{{ ns }}-star.is-off path{
+    fill:none;
+    stroke:#E0E6EF;
+  }
+
+  /* Arrows (desktop only) */
+  .{{ ns }}-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:56px;height:56px;border-radius:999px;border:0;background:#0f4264;color:#fff;
+    display:grid;place-items:center;box-shadow:0 12px 24px rgba(0,0,0,.18);cursor:pointer;z-index:2
+  }
+  .{{ ns }}-prev{left:-8px}
+  .{{ ns }}-next{right:-8px}
+  .{{ ns }}-nav[disabled]{opacity:.45;cursor:not-allowed; visibility: hidden}
+
+  /* Dots */
+  .{{ ns }}-dots{display:flex;gap:8px;justify-content:center;margin-top:16px}
+  .{{ ns }}-dot{width:8px;height:8px;border-radius:999px;background:#cfd8e3}
+  .{{ ns }}-dot.is-on{background:#0b3f66}
+
+  /* Mobile: 1 card per view, scrollable bar, arrows hidden */
+  @media (max-width: 989px){
+    .{{ ns }}-nav{display:none}
+    .{{ ns }}-dots{display:none}
+    .{{ ns }}-container{padding:0 10px}
+    .{{ ns }}-avatar--ph{display: none}
+    .{{ ns }}-name{font-weight:800;font-size:14px;}
+    .{{ ns }}-role{font-size:12px;color:#0f4264}
+    .{{ ns }}-body{color:#000;opacity:.95;line-height:1.6;margin-bottom:18px;font-size:12px;}
+    .{{ ns }}-track{overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px;gap:16px}
+    .{{ ns }}-item{flex:0 0 90%;scroll-snap-align:start}
+    .{{ ns }}-card{grid-template-columns:1fr;gap:16px}
+    .{{ ns }}-photo{min-height:150px; height: 160px;}
+  }
+</style>
+
+
+  <script>
+(function(){
+  var root = document.querySelector('.{{ ns }}-section');
+  if(!root) return;
+
+  var track    = root.querySelector('[data-track]');
+  var prev     = root.querySelector('.{{ ns }}-prev');
+  var next     = root.querySelector('.{{ ns }}-next');
+  var dotsWrap = root.querySelector('[data-dots]');
+  var thumb    = root.querySelector('.nf-progress'); // the only scrollbar UI on mobile
+
+  function isDesktop(){ return window.matchMedia('(min-width: 990px)').matches; }
+  function isMobile(){  return window.matchMedia('(max-width: 989px)').matches; }
+
+  /* ---------- Hide native scrollbar on mobile (keep scroll working) ---------- */
+  function injectMobileScrollbarCSS(){
+    var id = '{{ ns }}-hide-scroll';
+    if (document.getElementById(id)) return;
+    var css = `
+      @media (max-width: 989px){
+        .{{ ns }}-track{ scrollbar-width: none !important; }
+        .{{ ns }}-track::-webkit-scrollbar{ display: none !important; width: 0 !important; height: 0 !important; }
+      }
+    `;
+    var style = document.createElement('style');
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
+  injectMobileScrollbarCSS();
+
+  /* ---------- Core slider helpers ---------- */
+  function stepWidth(){
+    var card = track.querySelector(':scope > *');
+    if(!card) return 0;
+    var r = card.getBoundingClientRect();
+    var cs = getComputedStyle(track);
+    var gap = parseFloat(cs.columnGap || cs.gap || 0);
+    return Math.round(r.width + (isNaN(gap)?0:gap));
+  }
+
+  function updateArrows(){
+    var show = isDesktop() && track.scrollWidth > track.clientWidth + 4;
+    prev.hidden = next.hidden = !show;
+    if(!show) return;
+    var max = track.scrollWidth - track.clientWidth - 2;
+    prev.toggleAttribute('disabled', track.scrollLeft <= 1);
+    next.toggleAttribute('disabled', track.scrollLeft >= max);
+  }
+
+  function scrollDir(dir){
+    track.scrollTo({ left: track.scrollLeft + dir*stepWidth(), behavior: 'smooth' });
+    setTimeout(function(){ updateArrows(); updateDots(); }, 350);
+  }
+
+  next.addEventListener('click', function(){ scrollDir(+1); });
+  prev.addEventListener('click', function(){ scrollDir(-1); });
+  track.addEventListener('scroll', function(){
+    if(isDesktop()) updateArrows();
+    updateDots();
+    moveThumb();            // keep ns-progress in sync
+  }, {passive:true});
+
+  window.addEventListener('resize', function(){
+    buildDots();
+    updateArrows();
+    syncOverflowMode();
+    // give layout a tick to settle before moving thumb
+    clearTimeout(window.__tmsRsz);
+    window.__tmsRsz = setTimeout(moveThumb, 120);
+  });
+
+  /* ---------- Dots (desktop only; hidden by CSS on mobile) ---------- */
+  function perView(){ return isDesktop() ? 2 : 1; }
+
+  function buildDots(){
+    if(!dotsWrap) return;
+    var items = track.children.length;
+    var pages = Math.max(1, Math.ceil(items / perView()));
+    dotsWrap.innerHTML = '';
+    for(var i=0;i<pages;i++){
+      var d = document.createElement('span');
+      d.className = '{{ ns }}-dot' + (i===0?' is-on':'');
+      d.dataset.index = i;
+      d.addEventListener('click', function(){
+        var idx = parseInt(this.dataset.index, 10);
+        track.scrollTo({ left: idx * stepWidth(), behavior:'smooth' });
+      });
+      dotsWrap.appendChild(d);
+    }
+  }
+
+  function updateDots(){
+    if(!dotsWrap) return;
+    var step = stepWidth();
+    if(step<=0) return;
+    var idx = Math.round(track.scrollLeft / step);
+    var dots = dotsWrap.querySelectorAll('.{{ ns }}-dot');
+    dots.forEach(function(dot,i){ dot.classList.toggle('is-on', i===idx); });
+  }
+
+  /* ---------- ns-progress (mobile-only) ---------- */
+  function syncOverflowMode(){
+    // Ensure only our ns-progress is visible on mobile; native bar hidden via injected CSS
+    if(isMobile()){
+      track.style.overflowX = 'auto';
+      if (thumb) thumb.style.display = 'block';
+    }else{
+      track.style.overflowX = 'hidden';
+      if (thumb) thumb.style.display = 'none';
+    }
+  }
+
+  function moveThumb(){
+    if(!thumb) return;
+    if(!isMobile()){ thumb.style.transform = 'translateX(0)'; return; }
+
+    var barWidth  = thumb.offsetWidth || 70;   // typical fixed 70px
+    var viewW     = track.clientWidth;
+    var contentW  = track.scrollWidth;
+    var maxScroll = Math.max(1, contentW - viewW);
+    var ratio     = Math.min(1, Math.max(0, track.scrollLeft / maxScroll));
+    var travel    = Math.max(0, viewW - barWidth);
+    var x         = ratio * travel;
+
+    thumb.style.transform = 'translateX(' + x + 'px)';
+  }
+
+  // Refresh thumb when images inside cards load (widths can change)
+  Array.from(track.querySelectorAll('img')).forEach(function(img){
+    if(!img.complete){
+      img.addEventListener('load', function(){ requestAnimationFrame(moveThumb); }, { once:true });
+    }
+  });
+
+  /* ---------- Init ---------- */
+  buildDots();
+  updateArrows();
+  syncOverflowMode();
+  // first paint for the ns-progress
+  requestAnimationFrame(moveThumb);
+
+})();
+</script>
+
+</section>
+
+{% schema %}
+{
+  "name": "Testimonials Slider",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What Our Customers Says!" },
+    { "type": "color", "id": "bg", "label": "Background color", "default": "#FFF3F3" }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        { "type": "image_picker", "id": "photo", "label": "Desktop photo" },
+        { "type": "image_picker", "id": "mobile_photo", "label": "Mobile photo" },
+        { "type": "text", "id": "title", "label": "Headline", "default": "Outstanding Experience" },
+        { "type": "richtext", "id": "body", "label": "Review text", "default": "<p>kids station has adorable baby products, quick delivery, and top-notch quality. Highly recommended!</p>" },
+
+        { "type": "image_picker", "id": "avatar", "label": "Small avatar (optional)" },
+        { "type": "text", "id": "name", "label": "Reviewer name", "default": "Dr Jerome Grant" },
+        { "type": "text", "id": "role", "label": "Role / credential", "default": "Licensed Master Aesthetician" },
+
+        { "type": "select", "id": "platform", "label": "Platform logo", "default": "google", "options": [
+          { "value": "google", "label": "Google" },
+          { "value": "meta", "label": "Meta" },
+          { "value": "amazon", "label": "Amazon" },
+          { "value": "flipkart", "label": "Flipkart" }
+        ]},
+        { "type": "range", "id": "rating", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "Testimonials Slider",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,789 @@
+{% schema %}
+{
+  "name": "#ItFeelsTrending Slider",
+  "settings": [
+    { "type": "text", "id": "section_title", "label": "Section Title", "default": "#ItFeelsTrending" },
+
+    { "type": "color", "id": "buy_bg", "label": "Buy Now button background", "default": "#186599" },
+    { "type": "color", "id": "title_color", "label": "Product title color", "default": "#000000" },
+    { "type": "color", "id": "price_color", "label": "Price color", "default": "#186599" },
+    { "type": "color", "id": "card_bg", "label": "Product card (footer) background", "default": "#EAF3FB" },
+    { "type": "color", "id": "views_bg", "label": "Views count background", "default": "#FFFFFF" },
+    { "type": "color", "id": "views_text", "label": "Views count text color", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "trending_item",
+      "name": "Trending Item",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Select Product" },
+        { "type": "video_url", "id": "video_url", "label": "YouTube or Vimeo Link", "accept": ["youtube", "vimeo"] },
+        { "type": "video", "id": "uploaded_video", "label": "Upload Video" },
+        { "type": "text", "id": "views", "label": "Views Count", "default": "120k" }
+      ]
+    }
+  ],
+  "max_blocks": 15,
+  "presets": [
+    { "name": "#ItFeelsTrending", "category": "Custom" }
+  ]
+}
+{% endschema %}
+<div class="trending-section"
+     style="
+      --buy-bg: {{ section.settings.buy_bg }};
+      --title-color: {{ section.settings.title_color }};
+      --price-color: {{ section.settings.price_color }};
+      --card-bg: {{ section.settings.card_bg }};
+      --views-bg: {{ section.settings.views_bg }};
+      --views-text: {{ section.settings.views_text }};
+     ">
+  <h2 class="trending-heading">{{ section.settings.section_title }}</h2>
+
+  <div class="trending-wrapper">
+    <button class="trending-arrow prev" aria-label="Previous">&#8592;</button>
+
+    <div class="trending-track">
+      {% for block in section.blocks %}
+        {% assign product = all_products[block.settings.product] %}
+        {% if product %}
+          <div class="trending-card">
+            <div class="video-wrapper">
+              {% if block.settings.uploaded_video != blank %}
+                {{ block.settings.uploaded_video | video_tag:
+                    class: 'trend-video js-autoplay',
+                    autoplay: true,
+                    controls: false,
+                    loop: true,
+                    muted: true,
+                    playsinline: true,
+                    preload: 'metadata'
+                }}
+              {% elsif block.settings.video_url != blank %}
+                {% capture external_embed %}
+                  {{ block.settings.video_url | external_video_tag: class: 'trend-external', playsinline: true }}
+                {% endcapture %}
+                {% if external_embed contains '<iframe' or external_embed contains '<video' %}
+                  {{ external_embed }}
+                {% else %}
+                  {% assign url = block.settings.video_url | strip %}
+                  {% if url contains 'youtube.com' or url contains 'youtu.be' %}
+                    {% assign yid = '' %}
+                    {% if url contains 'youtu.be/' %}
+                      {% assign yid = url | split: 'youtu.be/' | last | split: '?' | first %}
+                    {% elsif url contains 'watch?v=' %}
+                      {% assign yid = url | split: 'watch?v=' | last | split: '&' | first %}
+                    {% elsif url contains '/shorts/' %}
+                      {% assign yid = url | split: '/shorts/' | last | split: '?' | first %}
+                    {% endif %}
+                    {% if yid != '' %}
+                      <iframe class="trend-external" src="https://www.youtube.com/embed/{{ yid }}"
+                              frameborder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowfullscreen></iframe>
+                    {% endif %}
+                  {% elsif url contains 'vimeo.com' %}
+                    {% assign vid = url | split: 'vimeo.com/' | last | split: '?' | first %}
+                    <iframe class="trend-external" src="https://player.vimeo.com/video/{{ vid }}"
+                            frameborder="0" allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen></iframe>
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+
+              <!-- Always render the overlay button (for uploaded & external) -->
+              <button class="video-toggle" type="button" aria-label="Play">
+                <span class="icon icon-pause">❚❚</span>
+                <span class="icon icon-play">►</span>
+              </button>
+
+              <span class="views">{{ block.settings.views }}</span>
+            </div>
+
+            <div class="card-footer">
+              <div class="product-info">
+                <div class="product-image">
+                  {% if product.featured_image %}
+                    <img src="{{ product.featured_image | img_url: '100x100' }}" alt="{{ product.title }}">
+                  {% endif %}
+                </div>
+                <div class="product-meta">
+                  <span class="product-title">{{ product.title }}</span>
+                  <span class="product-price">{{ product.price | money_without_trailing_zeros }}</span>
+                </div>
+              </div>
+              <a href="{{ product.url }}" class="buy-btn">Buy Now</a>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <!-- Mobile-only moving progress thumb -->
+    <div class="nf-progress" aria-hidden="true"></div>
+
+    <button class="trending-arrow next" aria-label="Next">&#8594;</button>
+  </div>
+</div>
+
+<!-- ===== Desktop-only modal ===== -->
+<div class="trend-modal" data-trend-modal hidden>
+  <div class="trend-backdrop" data-modal-close></div>
+  <div class="trend-dialog" role="dialog" aria-modal="true" aria-label="Video dialog">
+    <div class="trend-player" data-modal-player></div>
+  </div>
+</div>
+
+
+<style>
+/* ---------- base ---------- */
+.trending-section { padding: 50px 0px; max-width: 1300px; margin: 0 auto; }
+.trending-heading { font-size: 30px; font-weight: 600; margin-bottom: 20px; }
+.trending-wrapper { position: relative; align-items: center; }
+.trending-arrow {
+  background: #0f4264; color: #fff; border: none; border-radius: 50%;
+  width: 38px; height: 38px; cursor: pointer; display: none;
+  align-items: center; justify-content: center; z-index: 2;
+}
+.trending-track {
+  display: flex; overflow-x: auto; gap: 20px;
+  scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+}
+.trending-card {
+  flex: 0 0 100%; max-width: 100%; border-radius: 10px; overflow: hidden; background: #f9f9f9;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column;
+}
+
+/* Video */
+.video-wrapper { position: relative; width: 100%; aspect-ratio: 9 / 14; overflow: hidden; background: #000; }
+.video-wrapper .trend-video,
+.video-wrapper .trend-external,
+.video-wrapper iframe,
+.video-wrapper video { position: absolute; inset: 0; width: 100%; height: 100%; }
+.video-wrapper video { object-fit: cover; }
+.video-wrapper .trend-external, .video-wrapper iframe { border: 0; }
+
+/* Click-catcher over iframes on mobile so taps are reliable */
+.video-wrapper .video-hit{
+  position:absolute; inset:0; background:transparent; z-index: 11; display:none;
+}
+@media (max-width: 991px){
+  .video-wrapper.has-iframe .video-hit{ display:block; }
+}
+
+/* Views */
+.views{
+  position: absolute; top: 10px; left: 10px;
+  background: var(--views-bg, #ffffff); color: var(--views-text, #000);
+  font-size: 14px; padding: 4px 8px; border-radius: 6px; font-weight: 600; z-index: 0;
+}
+
+/* Footer */
+.card-footer{ background: var(--card-bg, #eaf3fb); padding: 10px; text-align: left; display: flex; flex-direction: column; gap: 10px; }
+.product-info{ display: grid; gap: 12px; grid-template-columns: 1fr 3fr; }
+.product-image img{ width: 56px; height: 56px; border-radius: 6px; background:#fff; }
+.product-meta{ display:flex; flex-direction:column; }
+.product-title{ font-size: 14px; font-weight: 600; color: var(--title-color, #000); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.product-price{ font-size: 15px; font-weight: 600; margin-top: 4px; color: var(--price-color, #0f4264); }
+.buy-btn{ display: block; text-align: center; text-transform: uppercase; padding: 6px 0; background: var(--buy-bg, #0f4264); color: #fff; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; width: 100%; }
+
+/* ---------- MOBILE ---------- */
+@media (max-width: 991px) {
+  .trending-heading{ font-size: 22px; padding-left: 10px;}
+  .trending-section{ padding: 28px 10px; }
+
+  .trending-section .trending-track{
+    --peek: 12vw; --gap: 10px;
+    padding-left: var(--peek); padding-right: var(--peek);
+    gap: var(--gap); scroll-snap-type: x mandatory; padding-bottom: 22px;
+  }
+
+  .trending-section .trending-card{
+    flex: 0 0 calc(100vw - (var(--peek) * 2) - var(--gap));
+    max-width: calc(100vw - (var(--peek) * 2) - var(--gap));
+    max-height: 86vh;
+    align-self: center;
+    scroll-snap-align: center; scroll-snap-stop: always;
+    background:#fff; border-radius:14px; box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    transition: transform .25s ease, opacity .25s ease;
+  }
+
+  .trending-section .trending-card .video-wrapper{ aspect-ratio: 9 / 9; }
+  .trending-section .trending-card.is-active .video-wrapper{ aspect-ratio: 9 / 12; }
+
+  .trending-section .trending-card{ transform: scale(.94); opacity:.85; }
+  .trending-section .trending-card.is-active{ transform: scale(.98); opacity:1; }
+
+  .trending-section .card-footer{ padding: 8px; gap: 6px; }
+  .trending-section .product-info{ display:flex; gap:8px; align-items:center; }
+  .trending-section .product-image img{ width: 42px; height: 42px; }
+  .trending-section .product-title{ font-size: 13px; -webkit-line-clamp: 2; }
+  .trending-section .product-price{ font-size: 14px; margin-top: 2px; }
+  .trending-section .buy-btn{ font-size: 13px; padding: 9px 0; }
+
+  .trending-wrapper .nf-progress{
+    height: 4px; width: 70px; margin-top: 10px; background: #0f4264;
+    border-radius: 999px; display: block; transform: translateX(0);
+    transition: transform 160ms linear;
+  }
+
+  .trending-wrapper .trending-track{ scrollbar-width: none; }
+  .trending-wrapper .trending-track::-webkit-scrollbar{ display: none; }
+
+  .views{ font-size: 12px; padding: 3px 6px; border-radius: 5px; }
+}
+
+/* ---------- desktop arrows ---------- */
+@media (min-width: 1024px) {
+  .trending-track{ overflow-x: hidden; }
+  .trending-card{ flex: 0 0 18.5%; max-width: 18.5%; }
+  .trending-arrow{ display:flex; position:absolute; top:40%; transform:translateY(-50%); }
+  .trending-arrow.prev{ left:-18px; }
+  .trending-arrow.next{ right:-18px; }
+  .nf-progress{
+    display: none !important;
+  }
+}
+.trending-arrow[disabled]{ opacity:.45; cursor:not-allowed; visibility: hidden}
+
+/* ===== Overlay button ===== */
+.video-toggle{
+  position: absolute; z-index: 12; border: 0; cursor: pointer;
+  width: 52px; height: 52px; border-radius: 50%;
+  display: grid; place-items: center; color:#fff;
+  background: rgba(0,0,0,.58);
+  transition: opacity .18s ease, transform .15s ease, visibility .18s ease;
+  opacity:1; visibility:visible;
+}
+
+/* Mobile: bottom-right & small */
+@media (max-width: 991px){
+  .video-toggle{
+    right:12px; bottom:12px; left:auto; top:auto; transform:none;
+    width:44px; height:44px;
+  }
+  .video-toggle .icon{ font-size:16px; }
+}
+
+/* Desktop: center on hover, show Play glyph on hover always */
+@media (min-width: 1024px){
+  .video-toggle{
+    left:50%; top:50%; right:auto; bottom:auto; transform: translate(-50%,-50%);
+    opacity:0; visibility:hidden;
+  }
+  .video-wrapper:hover .video-toggle{ opacity:1; visibility:visible; }
+  .video-wrapper:hover .video-toggle .icon-play{ display:block !important; }
+  .video-wrapper:hover .video-toggle .icon-pause{ display:none !important; }
+}
+
+.video-toggle .icon{ font-size: 18px; line-height: 1; display:none; }
+.video-toggle.is-paused  .icon-play{  display:block; } /* paused / auto-muted */
+.video-toggle.is-playing .icon-pause{ display:block; } /* playing */
+
+/* hide-once utility for first-tap experience */
+.video-toggle.is-hidden-once{ opacity:0 !important; visibility:hidden !important; }
+
+/* ===== Desktop-only Modal ===== */
+.trend-modal{ position: fixed; inset: 0; display: none; }
+.trend-modal[hidden]{ display: none !important; }
+@media screen and (min-width: 990px) and (max-width: 1320px){
+  .trending-section{
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+@media (min-width:1024px){
+  .trend-modal{ display: block; visibility: hidden; pointer-events: none; }
+  .trend-modal.is-open{ visibility: visible; pointer-events: auto; }
+  .trend-backdrop{ position:absolute; inset:0; background: rgba(0,0,0,.6); opacity:0; transition: opacity .2s ease; }
+  .trend-dialog{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; opacity:0; transition: opacity .2s ease; }
+  .trend-modal.is-open .trend-backdrop{ opacity:1; }
+  .trend-modal.is-open .trend-dialog{ opacity:1; }
+
+  .trend-player{
+    position: relative; background:#000; border-radius:16px; overflow:hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+  .trend-player iframe, .trend-player video{
+    position:absolute; inset:0; width:100%; height:100%; display:block; object-fit:contain;
+  }
+
+  .trend-player .trend-close{
+    position:absolute; right:12px; top:12px; z-index:20;
+    width:44px; height:44px; border-radius:999px; border:0;
+    background: rgba(0,0,0,.6); color:#fff; cursor:pointer;
+    display:grid; place-items:center; box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    transition: background .15s ease, transform .15s ease;
+  }
+  .trend-player .trend-close:hover{ background: rgba(0,0,0,.7); transform: scale(1.04); }
+  .trend-player .trend-close:active{ transform: scale(.98); }
+
+  html.trend-modal-open, body.trend-modal-open { overflow: hidden; }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const isDesktop = () => window.innerWidth >= 1024;
+  const isMobile  = () => window.innerWidth <= 991;
+
+  function bindOnce(el, key, fn){
+    if (!el || !fn) return false;
+    if (el.dataset[key] === "1") return false;
+    fn(); el.dataset[key] = "1"; return true;
+  }
+  function safePlay(video){
+    try { const p = video.play(); return (p && typeof p.then === "function") ? p.catch(()=>{}) : Promise.resolve(); }
+    catch(e){ return Promise.resolve(); }
+  }
+
+  /* ===== Iframe helpers ===== */
+  function extType(iframe){
+    const src = (iframe?.getAttribute('src') || '').toLowerCase();
+    if (src.includes('youtube.com') || src.includes('youtu.be')) return 'youtube';
+    if (src.includes('vimeo.com')) return 'vimeo';
+    return null;
+  }
+  function ensureIframeParams(iframe){
+    if (!iframe) return;
+    try{
+      const u = new URL(iframe.getAttribute('src') || '', location.href);
+      const t = extType(iframe);
+      if (t === 'youtube'){ u.searchParams.set('enablejsapi','1'); u.searchParams.set('playsinline','1'); }
+      if (t === 'vimeo'){   u.searchParams.set('background','0'); }
+      u.searchParams.set('origin', location.origin);
+      iframe.src = u.toString();
+      iframe.setAttribute('allow','autoplay; fullscreen; picture-in-picture');
+      iframe.setAttribute('allowfullscreen','');
+      iframe.style.display = 'block';
+    } catch(e){}
+  }
+  function seekIframeToStart(iframe){
+    const t = extType(iframe);
+    if (t === 'youtube'){
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'seekTo', args:[0, true]}), '*');
+    } else if (t === 'vimeo'){
+      iframe.contentWindow?.postMessage({ method:'setCurrentTime', value:0 }, '*');
+    }
+  }
+  function playIframeFromStart(wrapper){
+    const iframe = wrapper.querySelector('iframe.trend-external'); if (!iframe) return;
+    const t = extType(iframe);
+    if (t === 'youtube'){
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'unMute', args:[]}), '*');
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'seekTo', args:[0, true]}), '*');
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'playVideo', args:[]}), '*');
+    } else if (t === 'vimeo'){
+      iframe.contentWindow?.postMessage({ method:'setVolume', value:1 }, '*');
+      iframe.contentWindow?.postMessage({ method:'setCurrentTime', value:0 }, '*');
+      iframe.contentWindow?.postMessage({ method:'play' }, '*');
+    }
+    wrapper.dataset.state = 'playing';
+  }
+  function playIframeMuted(wrapper){
+    const iframe = wrapper.querySelector('iframe.trend-external'); if (!iframe) return;
+    const t = extType(iframe);
+    if (t === 'youtube'){
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'mute', args:[]}), '*');
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'playVideo', args:[]}), '*');
+    } else if (t === 'vimeo'){
+      iframe.contentWindow?.postMessage({ method:'setVolume', value:0 }, '*');
+      iframe.contentWindow?.postMessage({ method:'play' }, '*');
+    }
+    wrapper.dataset.state = 'auto-muted';
+  }
+  function pauseIframe(wrapper){
+    const iframe = wrapper.querySelector('iframe.trend-external'); if (!iframe) return;
+    const t = extType(iframe);
+    if (t === 'youtube'){
+      iframe.contentWindow?.postMessage(JSON.stringify({event:'command', func:'pauseVideo', args:[]}), '*');
+    } else if (t === 'vimeo'){
+      iframe.contentWindow?.postMessage({ method:'pause' }, '*');
+    }
+    wrapper.dataset.state = 'paused';
+  }
+
+  /* ===== Helpers to set UI/mute ===== */
+  function setBtnState(btn, playing){
+    if (!btn) return;
+    btn.classList.toggle('is-playing', !!playing);
+    btn.classList.toggle('is-paused', !playing);
+  }
+  function makeLocalAutoMuted(wrapper, video){
+    if (!video) return;
+    video.muted = true;
+    try{ video.volume = 0; }catch(_){}
+    video.loop = true; video.setAttribute('loop','');
+    safePlay(video);
+    wrapper.dataset.state = 'auto-muted';
+    const btn = wrapper.querySelector('.video-toggle'); setBtnState(btn, false);
+  }
+  function makeIframeAutoMuted(wrapper){
+    playIframeMuted(wrapper);
+    const btn = wrapper.querySelector('.video-toggle'); setBtnState(btn, false);
+  }
+  function muteCard(wrapper){
+    const v = wrapper.querySelector('.trend-video');
+    const i = wrapper.querySelector('iframe.trend-external');
+    if (v) makeLocalAutoMuted(wrapper, v);
+    if (i) makeIframeAutoMuted(wrapper);
+  }
+  function allCards(){ return Array.from(document.querySelectorAll('.trending-card')); }
+  function allWrappers(){ return Array.from(document.querySelectorAll('.trending-card .video-wrapper')); }
+
+  // Exclusivity: when one wrapper plays with sound, mute all others immediately
+  function makeSoundExclusiveFor(activeWrapper){
+    allWrappers().forEach(w => { if (w !== activeWrapper) muteCard(w); });
+  }
+
+  /* ===== Desktop slider ===== */
+  function initTrendingDesktop() {
+    if (!isDesktop()) return;
+    const track   = document.querySelector(".trending-track");
+    const prevBtn = document.querySelector(".trending-arrow.prev");
+    const nextBtn = document.querySelector(".trending-arrow.next");
+    if (!track || !prevBtn || !nextBtn) return;
+    if (track.dataset.desktopInit === "1") return;
+    track.dataset.desktopInit = "1";
+
+    const cards = Array.from(track.querySelectorAll(".trending-card"));
+    if (!cards.length) return;
+
+    const getGap = () => {
+      const cs = getComputedStyle(track);
+      const g = parseFloat(cs.columnGap || cs.gap || "20");
+      return isNaN(g) ? 20 : g;
+    };
+    const getStep = () => {
+      const first = cards[0]; if (!first) return track.clientWidth;
+      return Math.round(first.getBoundingClientRect().width + getGap());
+    };
+    const clampScroll = (x) => Math.max(0, Math.min(x, track.scrollWidth - track.clientWidth));
+    const updateArrows = () => {
+      const max = track.scrollWidth - track.clientWidth - 1;
+      prevBtn.toggleAttribute("disabled", track.scrollLeft <= 1);
+      nextBtn.toggleAttribute("disabled", track.scrollLeft >= max);
+    };
+    const scrollByDir = (dir) => {
+      const target = clampScroll(track.scrollLeft + dir * getStep());
+      track.scrollTo({ left: target, behavior: "smooth" });
+      setTimeout(updateArrows, 300);
+    };
+
+    prevBtn.addEventListener("click", () => scrollByDir(-1));
+    nextBtn.addEventListener("click", () => scrollByDir(+1));
+    track.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", () => { if (isDesktop()) updateArrows(); });
+    updateArrows();
+  }
+
+  /* ===== Active card management (mobile & desktop) ===== */
+  function applyActiveMediaState(activeCard){
+    // Force EVERY card to autoplay muted; active also starts auto-muted (user can unmute)
+    allCards().forEach(card=>{
+      const w = card.querySelector('.video-wrapper');
+      if (!w) return;
+      const local = w.querySelector('.trend-video');
+      const ext   = w.querySelector('iframe.trend-external');
+      if (local) makeLocalAutoMuted(w, local);
+      if (ext)   makeIframeAutoMuted(w);
+      card.classList.toggle('is-active', card === activeCard);
+    });
+  }
+
+  /* ===== Mobile snapping + clones ===== */
+  function initTrendingMobile() {
+    const track = document.querySelector(".trending-track");
+    if (!track || track.dataset.mobileInit === "1") return;
+    track.dataset.mobileInit = "1";
+
+    let cards = Array.from(track.querySelectorAll(".trending-card")); if (!cards.length) return;
+    const firstReal = cards[0], lastReal = cards[cards.length - 1];
+    const firstClone = firstReal.cloneNode(true), lastClone = lastReal.cloneNode(true);
+    firstClone.classList.add("is-clone"); lastClone.classList.add("is-clone");
+    track.insertBefore(lastClone, track.firstChild); track.appendChild(firstClone);
+    cards = Array.from(track.querySelectorAll(".trending-card"));
+
+    function setActive(el){
+      // center marker + media enforcement
+      cards.forEach(c => c.classList.remove("is-active"));
+      el.classList.add("is-active");
+      applyActiveMediaState(el);
+    }
+
+    function centerCard(el, smooth=false){
+      const cRect = track.getBoundingClientRect(), rect = el.getBoundingClientRect();
+      const target = track.scrollLeft + (rect.left - cRect.left) - (track.clientWidth - rect.width)/2;
+      track.scrollTo({ left: target, behavior: smooth ? "smooth" : "auto" });
+      setActive(el);
+    }
+
+    requestAnimationFrame(() => centerCard(firstReal, false));
+
+    // While scrolling, keep muting all but closest card (and also mute closest by default)
+    let rafId = null;
+    function onScroll(){
+      if (rafId) return;
+      rafId = requestAnimationFrame(()=>{
+        rafId = null;
+        const mid = track.scrollLeft + track.clientWidth / 2;
+        let closest=null, min=Infinity;
+        cards.forEach(card => { const c = card.offsetLeft + card.clientWidth/2; const d=Math.abs(c-mid); if (d<min){min=d; closest=card;} });
+        if (!closest) return;
+        if (closest.classList.contains("is-clone")) {
+          const real = (closest === cards[0]) ? lastReal : firstReal;
+          centerCard(real, false);
+        } else {
+          setActive(closest);
+        }
+      });
+    }
+    track.addEventListener("scroll", onScroll, { passive:true });
+
+    window.addEventListener("resize", () => {
+      const current = track.querySelector(".trending-card.is-active") || firstReal;
+      centerCard(current, false);
+    });
+  }
+
+  /* ===== Mobile progress thumb ===== */
+  function initTrendingProgressThumb(){
+    const track = document.querySelector(".trending-track");
+    const thumb = document.querySelector(".trending-wrapper .nf-progress");
+    if (!track || !thumb) return;
+    function moveThumb(){
+      if (!isMobile()) { thumb.style.transform = "translateX(0)"; return; }
+      const barWidth = thumb.offsetWidth || 70, viewW = track.clientWidth, contentW = track.scrollWidth;
+      const maxScroll = Math.max(1, contentW - viewW);
+      const ratio = Math.min(1, Math.max(0, track.scrollLeft / maxScroll));
+      const travel = Math.max(0, viewW - barWidth);
+      thumb.style.transform = "translateX(" + (ratio*travel) + "px)";
+    }
+    if (!track.dataset.progressBound){
+      track.addEventListener("scroll", moveThumb, { passive:true });
+      window.addEventListener("resize", () => requestAnimationFrame(moveThumb), { passive:true });
+      track.dataset.progressBound = "1";
+    }
+    track.querySelectorAll("img").forEach(img => { if (!img.complete) img.addEventListener("load", () => requestAnimationFrame(moveThumb), { once:true }); });
+    requestAnimationFrame(moveThumb);
+  }
+
+  /* ===== Ensure iframes sized ===== */
+  function ensureVideoSizing(){
+    document.querySelectorAll(".video-wrapper iframe").forEach(f => {
+      f.setAttribute("width","100%"); f.setAttribute("height","100%");
+      f.setAttribute("frameborder","0"); f.style.display="block";
+    });
+  }
+
+  /* ===== Desktop modal ===== */
+  const modal = document.querySelector('[data-trend-modal]');
+  const modalPlayer = modal?.querySelector('[data-modal-player]');
+  function openTrendModal(){ if (!modal) return; modal.hidden=false; modal.classList.add('is-open'); document.documentElement.classList.add('trend-modal-open'); document.body.classList.add('trend-modal-open'); }
+  function closeTrendModal(){
+    if (!modal) return; modal.classList.remove('is-open');
+    if (modalPlayer) modalPlayer.innerHTML=''; document.documentElement.classList.remove('trend-modal-open'); document.body.classList.remove('trend-modal-open');
+    setTimeout(()=>{ modal.hidden=true; },200);
+  }
+  function sizePlayerToAR(ar){
+    if (!modalPlayer) return;
+    const maxW = Math.floor(window.innerWidth*0.8), maxH = Math.floor(window.innerHeight*0.8);
+    let w=maxW, h=Math.round(maxW/ar); if (h>maxH){ h=maxH; w=Math.round(maxH*ar); }
+    modalPlayer.style.width=w+'px'; modalPlayer.style.height=h+'px'; modalPlayer.style.aspectRatio = ar ? ar : 'auto';
+  }
+  function getWrapperAR(wrapper){
+    const v = wrapper.querySelector('.trend-video');
+    if (v?.videoWidth && v?.videoHeight) return v.videoWidth / v.videoHeight;
+    const r = wrapper.getBoundingClientRect(); return (r.width && r.height) ? (r.width/r.height) : 9/16;
+  }
+  function injectCloseButton(){
+    const closeBtn = document.createElement('button');
+    closeBtn.className='trend-close'; closeBtn.type='button'; closeBtn.setAttribute('aria-label','Close'); closeBtn.setAttribute('title','Close'); closeBtn.setAttribute('data-modal-close','');
+    closeBtn.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M18.3 5.7a1 1 0 0 0-1.4-1.4L12 9.17 7.1 4.3a1 1 0 1 0-1.4 1.4L10.83 12l-5.13 4.9a1 1 0 1 0 1.4 1.45L12 14.83l4.9 4.92a1 1 0 0 0 1.4-1.45L13.17 12l5.13-4.9z" fill="currentColor"/></svg>';
+    modalPlayer.appendChild(closeBtn);
+  }
+  function openModalFromWrapper(wrapper, userEvt){
+    if (!isDesktop() || !modal || !modalPlayer) return;
+    const ar = getWrapperAR(wrapper); modalPlayer.innerHTML=''; sizePlayerToAR(ar); injectCloseButton();
+    const video = wrapper.querySelector('.trend-video'); const iframe = wrapper.querySelector('iframe.trend-external');
+    if (video){
+      const clone = video.cloneNode(true);
+      try{ clone.currentTime = 0; }catch(_){}
+      clone.muted=false; clone.removeAttribute('muted'); clone.setAttribute('controls',''); clone.controls=true; clone.setAttribute('loop',''); clone.loop=true; clone.setAttribute('playsinline',''); clone.playsInline=true; try{ clone.volume=1; }catch(_){}
+      modalPlayer.appendChild(clone); openTrendModal(); if (userEvt?.isTrusted){ try{ clone.play(); }catch(_){ safePlay(clone); } } else { safePlay(clone); }
+    } else if (iframe){
+      ensureIframeParams(iframe);
+      let src = iframe.getAttribute('src') || '';
+      try{
+        const u = new URL(src, location.href);
+        if (u.hostname.includes('youtube.com')){
+          u.searchParams.set('autoplay','1'); u.searchParams.set('mute','0'); u.searchParams.set('playsinline','1'); u.searchParams.set('enablejsapi','1'); u.searchParams.set('start','0');
+          const parts = u.pathname.split('/'); const vid = parts[parts.length-1] || ''; if (vid){ u.searchParams.set('loop','1'); u.searchParams.set('playlist', vid); }
+          src = u.toString();
+        } else if (u.hostname.includes('vimeo.com')){
+          u.searchParams.set('autoplay','1'); u.searchParams.set('muted','0'); u.searchParams.set('loop','1'); src = u.toString();
+        }
+      }catch(e){}
+      const mframe = document.createElement('iframe');
+      mframe.className='trend-external-modal'; mframe.setAttribute('allow','autoplay; fullscreen; picture-in-picture'); mframe.setAttribute('allowfullscreen',''); mframe.setAttribute('frameborder','0'); mframe.src=src;
+      modalPlayer.appendChild(mframe); openTrendModal();
+    }
+  }
+  if (modal){
+    modal.addEventListener('click', (e)=>{ if (e.target.closest('[data-modal-close]') || e.target.classList.contains('trend-backdrop')) closeTrendModal(); });
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && isDesktop()) closeTrendModal(); });
+  }
+
+  /* ===== Controls (mobile + desktop) ===== */
+  function initControls(){
+    // Touch hint
+    document.querySelectorAll(".video-wrapper").forEach(w => {
+      bindOnce(w, "touchHint", () => w.addEventListener("touchstart", ()=> w.classList.add("show-toggle"), { passive:true }));
+    });
+
+    // Mark iframe wrappers + click-catcher
+    document.querySelectorAll(".video-wrapper").forEach(wrapper=>{
+      const iframe = wrapper.querySelector('iframe.trend-external');
+      if (iframe){
+        ensureIframeParams(iframe); wrapper.classList.add('has-iframe');
+        if (!wrapper.querySelector('.video-hit')){ const hit=document.createElement('div'); hit.className='video-hit'; wrapper.appendChild(hit); }
+      }
+    });
+
+    // LOCAL <video>
+    document.querySelectorAll(".video-wrapper .trend-video").forEach(video=>{
+      const wrapper = video.closest(".video-wrapper"); if (!wrapper) return;
+      bindOnce(wrapper, "localBind2", ()=>{
+        const btn = wrapper.querySelector(".video-toggle");
+        video.setAttribute("playsinline",""); video.playsInline = true;
+        video.loop = true; video.setAttribute('loop','');
+
+        // default: auto-muted & playing muted
+        makeLocalAutoMuted(wrapper, video);
+
+        const area = (wrapper.querySelector('.video-hit') || wrapper);
+
+        // Area click (mobile) -> start from 0 with sound OR pause if already playing
+        area.addEventListener('click', (e)=>{
+          if (e.target.closest('.video-toggle')) return;
+          if (isMobile()){
+            if (wrapper.dataset.state !== 'playing'){
+              const wasAuto = wrapper.dataset.state === 'auto-muted';
+              if (btn && wasAuto){ btn.classList.add('is-hidden-once'); setTimeout(()=>btn.classList.remove('is-hidden-once'), 600); }
+              try{ video.currentTime = 0; }catch(_){}
+              video.muted = false; try{ video.volume = 1; }catch(_){}
+              safePlay(video); wrapper.dataset.state = 'playing'; setBtnState(btn, true);
+              makeSoundExclusiveFor(wrapper); // <-- mute others immediately
+            } else {
+              setTimeout(()=>{ try{ video.pause(); }catch(_){} wrapper.dataset.state = 'paused'; setBtnState(btn, false); }, 80);
+            }
+          } else {
+            openModalFromWrapper(wrapper, e);
+          }
+        });
+
+        // Icon click (mobile) -> toggle; when starting, begin at 0 with sound
+        if (btn){
+          btn.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            if (isMobile()){
+              if (wrapper.dataset.state === 'playing'){
+                try{ video.pause(); }catch(_){} wrapper.dataset.state = 'paused'; setBtnState(btn, false);
+              } else {
+                try{ video.currentTime = 0; }catch(_){}
+                video.muted = false; try{ video.volume = 1; }catch(_){}
+                safePlay(video); wrapper.dataset.state = 'playing'; setBtnState(btn, true);
+                makeSoundExclusiveFor(wrapper); // <-- mute others immediately
+              }
+            } else {
+              openModalFromWrapper(wrapper, e);
+            }
+          });
+        }
+
+        video.addEventListener('play',  ()=>{ wrapper.dataset.state='playing'; setBtnState(btn, true); });
+        video.addEventListener('pause', ()=>{ if (wrapper.dataset.state!=='auto-muted'){ wrapper.dataset.state='paused'; setBtnState(btn, false);} });
+        video.addEventListener('ended', ()=>{ try{ video.currentTime=0; }catch(_){ } wrapper.dataset.state='paused'; setBtnState(btn, false); });
+      });
+    });
+
+    // EXTERNAL iframes
+    document.querySelectorAll(".video-wrapper").forEach(wrapper=>{
+      const iframe = wrapper.querySelector('iframe.trend-external'); if (!iframe) return;
+      bindOnce(wrapper, "extBind2", ()=>{
+        const btn = wrapper.querySelector('.video-toggle');
+        ensureIframeParams(iframe);
+        makeIframeAutoMuted(wrapper); // default: auto-muted & playing muted
+
+        const area = (wrapper.querySelector('.video-hit') || wrapper);
+
+        // Area click (mobile) -> restart from 0 with sound, or pause if playing
+        area.addEventListener('click', (e)=>{
+          if (e.target.closest('.video-toggle')) return;
+          if (isMobile()){
+            if (wrapper.dataset.state !== 'playing'){
+              const wasAuto = wrapper.dataset.state === 'auto-muted';
+              if (btn && wasAuto){ btn.classList.add('is-hidden-once'); setTimeout(()=>btn.classList.remove('is-hidden-once'), 600); }
+              seekIframeToStart(iframe);
+              playIframeFromStart(wrapper);
+              setBtnState(btn, true);
+              makeSoundExclusiveFor(wrapper); // <-- mute others immediately
+            } else {
+              setTimeout(()=>{ pauseIframe(wrapper); setBtnState(btn, false); }, 80);
+            }
+          } else {
+            openModalFromWrapper(wrapper, e);
+          }
+        });
+
+        // Icon click -> toggle; when starting, start from 0
+        if (btn){
+          btn.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            if (isMobile()){
+              if (wrapper.dataset.state === 'playing'){
+                pauseIframe(wrapper); setBtnState(btn, false);
+              } else {
+                seekIframeToStart(iframe);
+                playIframeFromStart(wrapper); setBtnState(btn, true);
+                makeSoundExclusiveFor(wrapper); // <-- mute others immediately
+              }
+            } else {
+              openModalFromWrapper(wrapper, e);
+            }
+          });
+        }
+      });
+    });
+  }
+
+  /* ===== Boot ===== */
+  function boot(){
+    // init once per breakpoint
+    if (isDesktop()) initTrendingDesktop();
+    initTrendingMobile();
+    initTrendingProgressThumb();
+    ensureVideoSizing();
+    initControls();
+
+    // Enforce initial active-state (center) -> all auto-muted
+    const cards = allCards();
+    const active = document.querySelector(".trending-card.is-active") || cards[0];
+    if (active) applyActiveMediaState(active);
+  }
+  boot();
+
+  // Reboot on breakpoint change
+  let rTO;
+  window.addEventListener("resize", () => {
+    clearTimeout(rTO);
+    rTO = setTimeout(() => {
+      const track = document.querySelector(".trending-track");
+      if (!track) return;
+      const w = window.innerWidth;
+      if (w <= 991) { track.dataset.desktopInit = ""; }
+      else if (w >= 1024) { track.dataset.mobileInit = ""; }
+      boot();
+    }, 150);
+  });
+});
+</script>

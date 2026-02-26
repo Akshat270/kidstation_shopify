@@ -1,0 +1,525 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'section-related-products.css' | asset_url | stylesheet_tag }}
+
+{% if section.settings.image_shape == 'blob' %}
+  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+{%- style -%}
+  /* ---------------------------------
+     Section padding (unchanged)
+  ----------------------------------*/
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  @media screen and (min-width: 990px) and (max-width: 1320px){
+    product-recommendations{
+      padding-left: 20px !important;
+      padding-right: 20px !important;
+    }
+  }
+
+  product-recommendations{
+    max-width: 1300px !important;
+    margin: 0 auto;
+    padding-top: 36px !important;
+    padding-bottom: 36px !important;
+  }
+  .related-products__heading{
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+
+  /* =========================================
+     Related products slider — scoped styles
+  ========================================== */
+  .rp-{{ section.id }}{ position: relative; }
+  .rp-{{ section.id }} .rp-viewport{ overflow: hidden; }
+
+  /* Track: FORCE a single-row flex and beat Dawn's .grid */
+  .rp-{{ section.id }} .rp-list{
+    /* neutralize .grid */
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    grid-template-columns: none !important;
+    grid-auto-rows: auto !important;
+    align-items: stretch;
+
+    gap: 24px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;              /* Firefox: hide */
+    scroll-snap-type: x proximity;
+    padding: 4px 8px 12px;
+  }
+  .rp-{{ section.id }} .rp-list::-webkit-scrollbar{ display: none; }
+
+  /* Card width per breakpoint (controls how many fit per view) */
+  .rp-{{ section.id }} .rp-item{
+    flex: 0 0 var(--rp-card-w, clamp(260px, 24vw, 320px));
+    max-width: var(--rp-card-w, clamp(260px, 24vw, 320px));
+    scroll-snap-align: start;
+  }
+
+  /* Large desktop: little wider if space allows */
+  @media (min-width: 1200px){
+    .rp-{{ section.id }} .rp-item{
+      --rp-card-w: clamp(280px, 22vw, 300px);
+    }
+  }
+
+  /* Tablet sizing */
+  @media (min-width: 750px) and (max-width: 989px){
+    .rp-{{ section.id }} .rp-item{
+      --rp-card-w: clamp(260px, 42vw, 360px);
+    }
+  }
+
+  /* Mobile: one big card for nice swipe feel */
+  @media (max-width: 749px){
+    .rp-{{ section.id }} .rp-item{
+      --rp-card-w: 78vw;
+      max-width: 420px;
+    }
+    .related-products__heading{
+      font-size: 22px;
+    }
+    product-recommendations{
+      padding: 36px 12px !important;
+    }
+  }
+
+  /* Desktop arrows */
+  .rp-{{ section.id }} .rp-nav{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 48px; height: 48px;
+    border-radius: 999px;
+    border: 0;
+    display: grid; place-items: center;
+    background: #1f6aa0;                /* adjust to brand */
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    cursor: pointer;
+  }
+  .rp-{{ section.id }} .rp-prev{ left: -16px; }
+  .rp-{{ section.id }} .rp-next{ right: -16px; }
+  .rp-{{ section.id }} .rp-nav[disabled]{
+    opacity: 0;                          /* hidden & not clickable */
+    pointer-events: none;
+  }
+  product-recommendations .product-card-wrapper .slot--swatches .swatch-list{
+    display: none;
+  }
+  product-recommendations .price__line {
+    display: flex; gap: 5px; align-items: baseline; flex-wrap: wrap;
+  }
+  product-recommendations s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 16px !important;}
+  product-recommendations span.price-item--current { font-weight: bold; color: #0f4264; font-size: 18px !important;}
+  product-recommendations span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 16px !important;}
+  product-recommendations .price__tax-note { display: block; margin-top: 6px; opacity: .75; font-size: 14px !important;}
+
+  @media screen and (max-width: 991px){
+    product-recommendations s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 14px !important; color: rgba(0,0,0,0.5);}
+    product-recommendations span.price-item--current { font-weight: bold; color: #0f4264; font-size: 16px !important;}
+    product-recommendations span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 14px !important;}
+
+  }
+  /* Mobile: arrows hidden */
+  @media (max-width: 989px){
+    .rp-{{ section.id }} .rp-nav{ display:none; }
+  }
+
+  /* ============================
+     Mobile progress indicators
+     - ns-progress: fill bar
+     - nf-progress: moving thumb
+  ============================= */
+  @media (max-width: 989px){
+    /* ns-progress: background bar + inner span that grows */
+    .rp-{{ section.id }} .ns-progress{
+      position: relative;
+      height: 4px;
+      background: #e6eef5;
+      border-radius: 999px;
+      margin: 10px auto 0;
+      width: 100%;
+      max-width: 180px;
+      overflow: hidden;
+      display: block;
+    }
+    .rp-{{ section.id }} .ns-progress > span{
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 0%;
+      background: #1f6aa0;
+      border-radius: inherit;
+      transition: width .15s linear;
+    }
+
+    /* nf-progress: moving thumb that JS translates */
+    .rp-{{ section.id }} .nf-progress{
+      height: 4px;
+      width: 70px;                  /* thumb size */
+      margin: 10px 0 0;             /* aligned to track's left; translateX moves it */
+      background: #1f6aa0;
+      border-radius: 999px;
+      display: block;
+      transform: translateX(0);     /* updated via JS */
+      transition: transform 160ms linear;
+    }
+  }
+
+  /* Hide progress UI on desktop */
+  @media (min-width: 990px){
+    .rp-{{ section.id }} .ns-progress,
+    .rp-{{ section.id }} .nf-progress{ display: none; }
+  }
+{%- endstyle -%}
+
+
+<div class="color-{{ section.settings.color_scheme }} gradient">
+  <product-recommendations
+    class="related-products page-width section-{{ section.id }}-padding isolate{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+    data-url="{{ routes.product_recommendations_url }}?limit={{ section.settings.products_to_show }}"
+    data-section-id="{{ section.id }}"
+    data-product-id="{{ product.id }}"
+  >
+    {% if recommendations.performed and recommendations.products_count > 0 %}
+      <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
+        {{ section.settings.heading }}
+      </h2>
+
+      <!-- BEGIN: slider wrapper -->
+      <div class="rp-{{ section.id }}" data-section-id="{{ section.id }}">
+        <!-- desktop-only arrows -->
+        <button class="rp-nav rp-prev" aria-label="Previous" disabled>
+          ←
+        </button>
+
+        <div class="rp-viewport">
+          <ul
+            class="grid product-grid rp-list grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
+            role="list"
+          >
+            {% assign skip_card_product_styles = false %}
+            {% for recommendation in recommendations.products %}
+              <li class="grid__item rp-item">
+                {% render 'related-card-product',
+                  card_product: recommendation,
+                  media_aspect_ratio: section.settings.image_ratio,
+                  image_shape: section.settings.image_shape,
+                  show_secondary_image: section.settings.show_secondary_image,
+                  show_vendor: section.settings.show_vendor,
+                  show_rating: section.settings.show_rating,
+                  skip_styles: skip_card_product_styles
+                %}
+              </li>
+              {%- assign skip_card_product_styles = true -%}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <button class="rp-nav rp-next" aria-label="Next">
+          →
+        </button>
+
+        <!-- Mobile-only moving progress thumb -->
+        <div class="nf-progress" aria-hidden="true"></div>
+      </div>
+      <!-- END: slider wrapper -->
+    {% endif %}
+  </product-recommendations>
+
+  {% if section.settings.image_shape == 'arch' %}
+    {{ 'mask-arch.svg' | inline_asset_content }}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.related-products.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "paragraph", "content": "t:sections.related-products.settings.paragraph__1.content" },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "t:sections.related-products.settings.paragraph__1.default",
+      "label": "t:sections.related-products.settings.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        { "value": "h2",  "label": "t:sections.all.heading_size.options__1.label" },
+        { "value": "h1",  "label": "t:sections.all.heading_size.options__2.label" },
+        { "value": "h0",  "label": "t:sections.all.heading_size.options__3.label" },
+        { "value": "hxl", "label": "t:sections.all.heading_size.options__4.label" },
+        { "value": "hxxl","label": "t:sections.all.heading_size.options__5.label" }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+    { "type": "range", "id": "products_to_show", "min": 2, "max": 10, "step": 1, "default": 4, "label": "t:sections.related-products.settings.products_to_show.label" },
+    { "type": "range", "id": "columns_desktop", "min": 1, "max": 6, "step": 1, "default": 4, "label": "t:sections.related-products.settings.columns_desktop.label" },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "default": "2",
+      "label": "t:sections.related-products.settings.columns_mobile.label",
+      "options": [
+        { "value": "1", "label": "t:sections.related-products.settings.columns_mobile.options__1.label" },
+        { "value": "2", "label": "t:sections.related-products.settings.columns_mobile.options__2.label" }
+      ]
+    },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:sections.all.colors.label", "info": "t:sections.all.colors.has_cards_info", "default": "scheme-1" },
+    { "type": "header", "content": "t:sections.related-products.settings.header__2.content" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        { "value": "adapt",    "label": "t:sections.related-products.settings.image_ratio.options__1.label" },
+        { "value": "portrait", "label": "t:sections.related-products.settings.image_ratio.options__2.label" },
+        { "value": "square",   "label": "t:sections.related-products.settings.image_ratio.options__3.label" }
+      ],
+      "default": "adapt",
+      "label": "t:sections.related-products.settings.image_ratio.label"
+    },
+    {
+      "type": "select",
+      "id": "image_shape",
+      "options": [
+        { "value": "default",       "label": "t:sections.all.image_shape.options__1.label" },
+        { "value": "arch",          "label": "t:sections.all.image_shape.options__2.label" },
+        { "value": "blob",          "label": "t:sections.all.image_shape.options__3.label" },
+        { "value": "chevronleft",   "label": "t:sections.all.image_shape.options__4.label" },
+        { "value": "chevronright",  "label": "t:sections.all.image_shape.options__5.label" },
+        { "value": "diamond",       "label": "t:sections.all.image_shape.options__6.label" },
+        { "value": "parallelogram", "label": "t:sections.all.image_shape.options__7.label" },
+        { "value": "round",         "label": "t:sections.all.image_shape.options__8.label" }
+      ],
+      "default": "default",
+      "label": "t:sections.all.image_shape.label"
+    },
+    { "type": "checkbox", "id": "show_secondary_image", "default": false, "label": "t:sections.related-products.settings.show_secondary_image.label" },
+    { "type": "checkbox", "id": "show_vendor", "default": false, "label": "t:sections.related-products.settings.show_vendor.label" },
+    { "type": "checkbox", "id": "show_rating", "default": false, "label": "t:sections.related-products.settings.show_rating.label", "info": "t:sections.related-products.settings.show_rating.info" },
+    { "type": "header", "content": "t:sections.all.padding.section_padding_heading" },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "t:sections.all.padding.padding_top", "default": 36 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 100, "step": 4, "unit": "px", "label": "t:sections.all.padding.padding_bottom", "default": 36 }
+  ]
+}
+{% endschema %}
+
+<script>
+/*
+  Related Products slider JS
+  - Handles horizontal slider / arrows / progress bar
+  - NO swatch logic here anymore (moved to related-product-card snippet)
+*/
+(function () {
+
+  function getProgressTargets(root, track){
+    var targets = [];
+
+    // ns-progress: fill inner span
+    var ns = root.querySelector('.ns-progress');
+    if (ns){
+      var span = ns.querySelector('span');
+      if (!span){
+        span = document.createElement('span');
+        ns.appendChild(span);
+      }
+      targets.push({ type:'ns', el: ns, span: span });
+    }
+
+    // nf-progress: move the bar itself (no span required)
+    var nf = root.querySelector('.nf-progress');
+    if (nf){
+      targets.push({ type:'nf', el: nf });
+    }
+
+    return targets;
+  }
+
+  function initRP(root) {
+    if (!root || root.dataset.rpInited === '1') return;
+    root.dataset.rpInited = '1';
+
+    var viewport = root.querySelector('.rp-viewport');
+    var track    = root.querySelector('.rp-list');
+    var prevBtn  = root.querySelector('.rp-prev');
+    var nextBtn  = root.querySelector('.rp-next');
+
+    if (!viewport || !track) return;
+
+    var progressTargets = getProgressTargets(root, track);
+
+    function getGap() {
+      var cs = window.getComputedStyle(track);
+      var g  = cs.getPropertyValue('column-gap') || cs.getPropertyValue('gap') || '0px';
+      var n  = parseFloat(g);
+      return isFinite(n) ? n : 0;
+    }
+
+    function maxScroll() {
+      return Math.max(0, track.scrollWidth - track.clientWidth - 1);
+    }
+
+    function atStart() {
+      return track.scrollLeft <= 1;
+    }
+
+    function atEnd() {
+      return track.scrollLeft >= maxScroll();
+    }
+
+    // step = distance between first two items (includes gap)
+    function getStep() {
+      var items = track.querySelectorAll('.rp-item');
+      if (items.length >= 2) {
+        var a = items[0].getBoundingClientRect();
+        var b = items[1].getBoundingClientRect();
+        var dx = Math.abs(b.left - a.left);
+        if (dx > 0) return dx;
+      }
+      if (items.length){
+        return items[0].getBoundingClientRect().width + getGap();
+      }
+      return viewport.clientWidth;
+    }
+
+    function setDisabled(el, on) {
+      if (!el) return;
+      if (on) el.setAttribute('disabled', '');
+      else    el.removeAttribute('disabled');
+    }
+
+    function updateProgress(){
+      var total = track.scrollWidth - track.clientWidth;
+      var ratio = total > 0 ? (track.scrollLeft / total) : 0;
+
+      for (var i=0;i<progressTargets.length;i++){
+        var t = progressTargets[i];
+
+        if (t.type === 'ns' && t.span){
+          // fill bar
+          t.span.style.width = (ratio * 100) + '%';
+        }
+
+        if (t.type === 'nf'){
+          // move thumb across the viewport like trending
+          var viewW   = track.clientWidth;
+          var thumbW  = t.el.offsetWidth || 70;
+          var travel  = Math.max(0, viewW - thumbW);
+
+          // only animate on mobile
+          if (window.matchMedia('(max-width: 989px)').matches){
+            t.el.style.transform = 'translateX(' + (ratio * travel) + 'px)';
+          } else {
+            t.el.style.transform = 'translateX(0px)';
+          }
+        }
+      }
+    }
+
+    function updateUI() {
+      var isDesktop = window.matchMedia('(min-width: 990px)').matches;
+      if (isDesktop) {
+        setDisabled(prevBtn, atStart());
+        setDisabled(nextBtn, atEnd());
+      }
+      updateProgress();
+    }
+
+    function nudge(dir) {
+      var step   = getStep();
+      var target = Math.max(
+        0,
+        Math.min(track.scrollLeft + dir * step, maxScroll())
+      );
+      track.scrollTo({ left: target, behavior: 'smooth' });
+    }
+
+    if (nextBtn){
+      nextBtn.addEventListener('click', function () { nudge(+1); });
+    }
+    if (prevBtn){
+      prevBtn.addEventListener('click', function () { nudge(-1); });
+    }
+
+    var rafId = null;
+    function onScroll() {
+      if (rafId) return;
+      rafId = requestAnimationFrame(function () {
+        rafId = null;
+        updateUI();
+      });
+    }
+
+    track.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    // Watch for dynamic content changes (apps injecting recs etc.)
+    var mo = new MutationObserver(function(){
+      progressTargets = getProgressTargets(root, track);
+      onScroll();
+    });
+    mo.observe(track, { childList: true, subtree: true });
+
+    // Initial paint
+    updateUI();
+  }
+
+  /* Initialize every related-products wrapper for this section.id */
+  function initAllIn(scope) {
+    var roots = (scope || document)
+      .querySelectorAll('.rp-{{ section.id }}[data-section-id="{{ section.id }}"]');
+    for (var i = 0; i < roots.length; i++){
+      initRP(roots[i]);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // watch product-recommendations block for ajax-injected recs
+    var pr = document.querySelector(
+      'product-recommendations[data-section-id="{{ section.id }}"]'
+    );
+    if (pr) {
+      var obs = new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          if (muts[i].addedNodes && muts[i].addedNodes.length) {
+            initAllIn(pr);
+          }
+        }
+      });
+      obs.observe(pr, { childList: true, subtree: true });
+    }
+
+    initAllIn(document);
+  });
+
+  /* Re-init slider UI in Theme Editor section load */
+  document.addEventListener('shopify:section:load', function (e) {
+    var container = e && e.target ? e.target : null;
+    if (container) {
+      initAllIn(container);
+    }
+  });
+
+})();
+</script>

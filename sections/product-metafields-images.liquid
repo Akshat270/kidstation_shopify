@@ -1,0 +1,291 @@
+{% comment %}
+  Variant Banner Gallery (Standalone Section)
+  - Shows images from *variant* metafields only (single image each):
+      • Desktop: variant.metafields.custom.banner_d1 .. banner_d10
+      • Mobile : variant.metafields.custom.banner_m1 .. banner_m10
+  - Auto-updates when the variant changes (Dawn-compatible & fallbacks).
+{% endcomment %}
+
+{% assign ns = 'vbg-' | append: section.id %}
+{% assign v = product.selected_or_first_available_variant %}
+
+<section class="{{ ns }} {% if section.settings.use_page_width %}page-width{% endif %}"
+  style="
+    --vbg-bg: {{ section.settings.bg | default: '#ffffff' }};
+    --vbg-title: {{ section.settings.title_color | default: '#111111' }};
+    --vbg-radius: {{ section.settings.radius | default: 0 }}px;
+    --vbg-border-w: {{ section.settings.border_w | default: 0 }}px;
+    --vbg-border: {{ section.settings.border_color | default: '#e5e5e5' }};
+    --vbg-opacity: {{ section.settings.opacity | divided_by: 100.0 }};
+    --vbg-gap: {{ section.settings.stack_gap | default: 16 }}px;
+    --vbg-pad-t: {{ section.settings.pad_t | default: 24 }}px;
+    --vbg-pad-b: {{ section.settings.pad_b | default: 24 }}px;
+    --vbg-pad-l: {{ section.settings.pad_l | default: 12 }}px;
+    --vbg-pad-r: {{ section.settings.pad_r | default: 12 }}px;
+  "
+  data-section-id="{{ section.id }}"
+  {% if product %}data-product-id="{{ product.id }}"{% endif %}
+  {% if v %}data-initial-variant-id="{{ v.id }}"{% endif %}
+>
+  {% if section.settings.heading != blank %}
+    <h2 class="{{ ns }}__title">{{ section.settings.heading }}</h2>
+  {% endif %}
+
+  {% if product and v %}
+    {%- comment -%} Visible stacks (start with selected variant’s images) {%- endcomment -%}
+    <div class="{{ ns }}__stack {{ ns }}__stack--desktop" data-live-target="desktop">
+      {%- assign has_desk = 0 -%}
+      {% for i in (1..10) %}
+        {% assign k = 'banner_d' | append: i %}
+        {% assign mf = v.metafields.custom[k] %}
+        {% if mf != blank %}
+          {% assign has_desk = 1 %}
+          <figure class="{{ ns }}__item">
+            <img
+              src="{{ mf | image_url: width: 2000 }}"
+              srcset="
+                {{ mf | image_url: width: 600  }} 600w,
+                {{ mf | image_url: width: 1000 }} 1000w,
+                {{ mf | image_url: width: 1600 }} 1600w,
+                {{ mf | image_url: width: 2000 }} 2000w
+              "
+              sizes="(max-width: 989px) 100vw, 1200px"
+              alt="{{ mf.alt | default: product.title | escape }}"
+              loading="lazy"
+              class="{{ ns }}__img">
+          </figure>
+        {% endif %}
+      {% endfor %}
+      {% if has_desk == 0 %}
+        <!-- empty initial desktop; JS may fill on change -->
+      {% endif %}
+    </div>
+
+    <div class="{{ ns }}__stack {{ ns }}__stack--mobile" data-live-target="mobile">
+      {%- assign has_mob = 0 -%}
+      {% for i in (1..10) %}
+        {% assign k = 'banner_m' | append: i %}
+        {% assign mf = v.metafields.custom[k] %}
+        {% if mf != blank %}
+          {% assign has_mob = 1 %}
+          <figure class="{{ ns }}__item">
+            <img
+              src="{{ mf | image_url: width: 1200 }}"
+              srcset="
+                {{ mf | image_url: width: 360  }} 360w,
+                {{ mf | image_url: width: 720  }} 720w,
+                {{ mf | image_url: width: 1080 }} 1080w,
+                {{ mf | image_url: width: 1440 }} 1440w
+              "
+              sizes="(max-width: 989px) 100vw, 720px"
+              alt="{{ mf.alt | default: product.title | escape }}"
+              loading="lazy"
+              class="{{ ns }}__img">
+          </figure>
+        {% endif %}
+      {% endfor %}
+      {% if has_mob == 0 %}
+        <!-- empty initial mobile; JS may fill on change -->
+      {% endif %}
+    </div>
+
+    {%- comment -%}
+      Hidden stash: templates for every variant (desktop & mobile)
+      We copy these into the live targets on variant change.
+    {%- endcomment -%}
+    <div class="{{ ns }}__stash" hidden>
+      {% for variant in product.variants %}
+        <template data-variant-id="{{ variant.id }}" data-type="desktop">
+          {% for i in (1..10) %}
+            {% assign k = 'banner_d' | append: i %}
+            {% assign mf = variant.metafields.custom[k] %}
+            {% if mf != blank %}
+              <figure class="{{ ns }}__item">
+                <img
+                  src="{{ mf | image_url: width: 2000 }}"
+                  srcset="
+                    {{ mf | image_url: width: 600  }} 600w,
+                    {{ mf | image_url: width: 1000 }} 1000w,
+                    {{ mf | image_url: width: 1600 }} 1600w,
+                    {{ mf | image_url: width: 2000 }} 2000w
+                  "
+                  sizes="(max-width: 989px) 100vw, 1200px"
+                  alt="{{ mf.alt | default: product.title | escape }}"
+                  loading="lazy"
+                  class="{{ ns }}__img">
+              </figure>
+            {% endif %}
+          {% endfor %}
+        </template>
+
+        <template data-variant-id="{{ variant.id }}" data-type="mobile">
+          {% for i in (1..10) %}
+            {% assign k = 'banner_m' | append: i %}
+            {% assign mf = variant.metafields.custom[k] %}
+            {% if mf != blank %}
+              <figure class="{{ ns }}__item">
+                <img
+                  src="{{ mf | image_url: width: 1200 }}"
+                  srcset="
+                    {{ mf | image_url: width: 360  }} 360w,
+                    {{ mf | image_url: width: 720  }} 720w,
+                    {{ mf | image_url: width: 1080 }} 1080w,
+                    {{ mf | image_url: width: 1440 }} 1440w
+                  "
+                  sizes="(max-width: 989px) 100vw, 720px"
+                  alt="{{ mf.alt | default: product.title | escape }}"
+                  loading="lazy"
+                  class="{{ ns }}__img">
+              </figure>
+            {% endif %}
+          {% endfor %}
+        </template>
+      {% endfor %}
+    </div>
+
+    {% unless has_desk == 1 or has_mob == 1 %}
+      <div class="{{ ns }}__empty">
+        {% comment %} <p>No variant banner images yet. Add files to
+          <code>variant.metafields.custom.banner_d1..banner_d10</code> (desktop) and
+          <code>variant.metafields.custom.banner_m1..banner_m10</code> (mobile).
+        </p> {% endcomment %}
+      </div>
+    {% endunless %}
+  {% else %}
+    <div class="{{ ns }}__empty"><p>This section should be used on a product page.</p></div>
+  {% endif %}
+</section>
+
+<style>
+  .{{ ns }}{
+    background: var(--vbg-bg);
+    padding-top: var(--vbg-pad-t);
+    padding-bottom: var(--vbg-pad-b);
+  }
+  .{{ ns }}__title{
+    color: var(--vbg-title);
+    margin: 0 0 20px;
+    font-size: 22px;
+    line-height: 1.2;
+    text-align: left;
+  }
+  .{{ ns }}__stack{
+    display: grid;
+    gap: var(--vbg-gap);
+  }
+  .{{ ns }}__item{ margin: 0; }
+  .{{ ns }}__img{
+    width: 100%;
+    display: block;
+    border-radius: var(--vbg-radius);
+    border: var(--vbg-border-w) solid var(--vbg-border);
+    opacity: var(--vbg-opacity);
+  }
+  .{{ ns }}__empty{
+    max-width: 720px; margin: 8px auto 0; color: #666; font-size: 14px;
+  }
+
+  /* Show mobile stack by default, desktop stack on ≥990px */
+  .{{ ns }}__stack--desktop{ display: none; }
+  .{{ ns }}__stack--mobile{ display: grid; }
+
+  @media (min-width: 990px){
+    .{{ ns }}__stack--desktop{ display: grid; }
+    .{{ ns }}__stack--mobile{ display: none; }
+    .{{ ns }}__title{ font-size: 30px; }
+  }
+  @media (max-width: 988px){
+    .{{ ns }}{
+      padding-left: var(--vbg-pad-l);
+      padding-right: var(--vbg-pad-r);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function(){
+    const root = document.querySelector('section.{{ ns }}[data-section-id="{{ section.id }}"]');
+    if (!root) return;
+
+    const liveDesktop = root.querySelector('[data-live-target="desktop"]');
+    const liveMobile  = root.querySelector('[data-live-target="mobile"]');
+    const stash       = root.querySelector('.{{ ns }}__stash');
+    const initialId   = root.getAttribute('data-initial-variant-id');
+
+    function swap(type, variantId){
+      if (!stash || !variantId) return;
+      const tpl = stash.querySelector(`template[data-variant-id="${variantId}"][data-type="${type}"]`);
+      const live = type === 'desktop' ? liveDesktop : liveMobile;
+      if (!live) return;
+      live.innerHTML = tpl && tpl.innerHTML.trim() ? tpl.innerHTML : '';
+    }
+
+    function getCurrentVariantId(){
+      // Fallback: read product form input[name="id"]
+      const input = document.querySelector('form[action*="/cart/add"] input[name="id"]');
+      if (input && input.value) return input.value;
+      return initialId || null;
+    }
+
+    function refreshAll(){
+      const id = getCurrentVariantId();
+      if (!id) return;
+      swap('desktop', id);
+      swap('mobile', id);
+    }
+
+    // Initial sync
+    refreshAll();
+
+    // Listen for common theme variant change events
+    function onVariantChange(e){
+      const v = e?.detail?.variant || e?.detail?.variantData || e?.detail;
+      const id = v && (v.id || v.variantId || v.variant_id);
+      if (id) {
+        swap('desktop', id);
+        swap('mobile', id);
+      }
+    }
+    document.addEventListener('variant:change', onVariantChange);
+    document.addEventListener('product:variant-change', onVariantChange);
+    document.addEventListener('variant:changed', onVariantChange);
+
+    // Fallback: watch the hidden variant id input
+    const idInput = document.querySelector('form[action*="/cart/add"] input[name="id"]');
+    if (idInput) {
+      idInput.addEventListener('change', refreshAll);
+      const mo = new MutationObserver(refreshAll);
+      mo.observe(idInput, { attributes: true, attributeFilter: ['value'] });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Variant Banner Gallery",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "checkbox", "id": "use_page_width", "label": "Constrain to page width", "default": true },
+    { "type": "text", "id": "heading", "label": "Title", "default": "More for this variant" },
+
+    { "type": "color", "id": "bg", "label": "Background color", "default": "#ffffff" },
+    { "type": "color", "id": "title_color", "label": "Title color", "default": "#0a0a0a" },
+
+    { "type": "range", "id": "radius", "label": "Image border radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 12 },
+    { "type": "range", "id": "border_w", "label": "Image border width", "min": 0, "max": 8, "step": 1, "unit": "px", "default": 0 },
+    { "type": "color", "id": "border_color", "label": "Image border color", "default": "#e5e5e5" },
+    { "type": "range", "id": "opacity", "label": "Image opacity", "min": 20, "max": 100, "step": 5, "unit": "%", "default": 100 },
+
+    { "type": "range", "id": "stack_gap", "label": "Gap between images", "min": 0, "max": 48, "step": 2, "unit": "px", "default": 16 },
+
+    { "type": "range", "id": "pad_t", "label": "Padding top", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "pad_b", "label": "Padding bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "pad_l", "label": "Padding left", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "pad_r", "label": "Padding right", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 24 }
+  ],
+  "presets": [
+    { "name": "Variant Banner Gallery" }
+  ]
+}
+{% endschema %}

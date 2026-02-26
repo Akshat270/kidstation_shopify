@@ -1,0 +1,317 @@
+{% assign ns = 'brand-' | append: section.id %}
+
+<section class="{{ ns }}-section" data-section-id="{{ section.id }}">
+  <div class="{{ ns }}-container">
+    {% if section.settings.heading != blank %}
+      <h2 class="{{ ns }}-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <div class="{{ ns }}-slider">
+      <!-- Prev (desktop only) -->
+      <button class="{{ ns }}-nav {{ ns }}-prev" type="button" aria-label="Previous" hidden>
+        ←
+      </button>
+
+      <!-- Track -->
+      <div class="{{ ns }}-track" data-track>
+        {% for block in section.blocks %}
+          {% assign col = block.settings.collection %}
+          {% if col %}
+            {% assign cover = block.settings.image | default: col.image %}
+            {% if cover == blank and col.products_count > 0 %}
+              {% assign cover = col.products.first.featured_image %}
+            {% endif %}
+
+            {%- comment -%}
+              Per-block visual controls → CSS variables on the card element
+            {%- endcomment -%}
+            {% assign _cta_bg   = block.settings.cta_bg   | default: '#ffffff' %}
+            {% assign _cta_text = block.settings.cta_text | default: '#111111' %}
+            {% assign _ov_col   = block.settings.overlay_color | default: '#000000' %}
+            {% assign _ov_pct   = block.settings.overlay_strength | default: 55 %}
+            {% assign _ov_alpha = _ov_pct | divided_by: 100.0 %}
+            {% assign _ov_rgba  = _ov_col | color_modify: 'alpha', _ov_alpha %}
+            {% assign _gray     = block.settings.grayscale | default: 0 %}
+
+            <a
+              class="{{ ns }}-card"
+              href="{{ col.url }}"
+              aria-label="{{ col.title | escape }}"
+              {{ block.shopify_attributes }}
+              style="--cta-bg: {{ _cta_bg }}; --cta-color: {{ _cta_text }}; --overlay-rgba: {{ _ov_rgba }}; --gray: {{ _gray }}%;"
+            >
+              {% if cover %}
+                <img class="{{ ns }}-bg" src="{{ cover | image_url: width: 1200 }}" alt="{{ col.title | escape }}" loading="lazy">
+              {% else %}
+                <div class="{{ ns }}-ph">No image</div>
+              {% endif %}
+
+              <div class="{{ ns }}-overlay">
+                <div class="{{ ns }}-title">{{ col.title }}</div>
+                {% if section.settings.show_counts %}
+                  {% assign pc = col.all_products_count | default: col.products_count %}
+                  <div class="{{ ns }}-count">{{ pc }} {{ pc | pluralize: 'Product', 'Products' }}</div>
+                {% endif %}
+                <span class="{{ ns }}-cta">{{ block.settings.cta_label | default: 'Shop Now' }}</span>
+              </div>
+            </a>
+          {% else %}
+            <div class="{{ ns }}-card {{ ns }}-card--empty" {{ block.shopify_attributes }}>
+              <div class="{{ ns }}-ph">Assign a collection</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Mobile-only progress thumb -->
+      <div class="nf-progress"></div> 
+
+      <!-- Next (desktop only) -->
+      <button class="{{ ns }}-nav {{ ns }}-next" type="button" aria-label="Next" hidden>
+        →
+      </button>
+    </div>
+  </div>
+  <style>
+    .{{ ns }}-section{padding:36px 0}
+    .{{ ns }}-container{max-width:1300px;margin:0 auto;padding:0}
+    .{{ ns }}-heading{margin:0 0 18px;font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.15}
+
+    /* Slider shell */
+    .{{ ns }}-slider{position:relative}
+    :root{--{{ ns }}-gap:24px}
+
+    /* Track (flex row) */
+    .{{ ns }}-track{
+      display:flex; gap:var(--{{ ns }}-gap);
+      overflow-x:hidden; /* desktop hides; mobile shows below */
+      scroll-behavior:smooth;
+    }
+
+    /* Card */
+    .{{ ns }}-card{
+      position:relative; display:block; color:inherit; text-decoration:none;
+      border-radius:14px; overflow:hidden; background:#f3f4f6;
+      flex:0 0 calc((100% - (var(--{{ ns }}-gap) * 3)) / 4); /* 4-up */
+      height:420px;
+    }
+    .{{ ns }}-card.--phantom{pointer-events:none;opacity:0}
+
+    /* CHANGED: add grayscale via CSS var */
+    .{{ ns }}-bg{
+      width:100%;height:100%;object-fit:cover;display:block;
+      filter:saturate(.95) grayscale(var(--gray, 0%));
+    }
+
+    .{{ ns }}-ph{display:grid;place-items:center;height:100%;color:#666;background:linear-gradient(180deg,#fafafa,#f3f3f3)}
+
+    .{{ ns }}-overlay{
+      position:absolute; top: 20px; left: 20px;
+      color:#fff; z-index:2;
+    }
+
+    /* CHANGED: overlay color/opacity comes from per-block var */
+    .{{ ns }}-card::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, var(--overlay-rgba) 0%, var(--overlay-rgba) 100%);
+      z-index:1;
+    }
+
+    .{{ ns }}-title{font-size:clamp(18px,2.2vw,25px);font-weight:800;}
+    .{{ ns }}-count{opacity:.9;margin-bottom:8px; font-size:clamp(14px,2.2vw,16px);}
+
+    /* CHANGED: CTA uses per-block colors */
+    .{{ ns }}-cta{
+      display:inline-block;background:var(--cta-bg);color:var(--cta-color);
+      border-radius: 5px; padding: 6px 24px;font-weight:800;
+      box-shadow:0 8px 20px rgba(0,0,0,.28)
+    }
+
+    /* Nav arrows (desktop only) */
+    .{{ ns }}-nav{
+      position:absolute; top:50%; transform:translateY(-50%);
+      width:56px;height:56px;border-radius:999px;border:0;cursor:pointer;
+      display:grid;place-items:center;background:#0f4264;color:#fff;
+      box-shadow:0 12px 24px rgba(0,0,0,.25); z-index:1;
+      transition:transform .15s ease, opacity .15s ease; opacity:1;
+    }
+    .{{ ns }}-nav[disabled]{opacity:.45;cursor:not-allowed; visibility: hidden}
+    .{{ ns }}-prev{left:-20px}
+    .{{ ns }}-next{right:-22px}
+
+    /* Mobile behavior */
+    @media (max-width:989px){
+      .{{ ns }}-nav{display:none}
+      .{{ ns }}-container{padding: 0 10px}
+      .{{ ns }}-track{
+        overflow-x:auto; /* show native scrollbar/drag */
+        scroll-snap-type:x mandatory;
+        gap: 16px;
+        padding-bottom:8px; /* avoid iOS scrollbar overlap */
+      }
+      .{{ ns }}-card{
+        flex:0 0 78vw; height:58vw; min-height:320px; scroll-snap-align:start;
+      }
+    }
+  </style>
+  <script>
+(function(){
+  var root  = document.querySelector('.{{ ns }}-section');
+  if(!root) return;
+
+  var track = root.querySelector('[data-track]');
+  var prev  = root.querySelector('.{{ ns }}-prev');
+  var next  = root.querySelector('.{{ ns }}-next');
+  var thumb = root.querySelector('.nf-progress'); // your blue 70px bar
+
+  function isDesktop(){ return window.matchMedia('(min-width: 990px)').matches; }
+  function isMobile(){ return window.innerWidth <= 989; }
+
+  /* ---------- Arrows / desktop slider ---------- */
+  function getStep(){
+    // one card width + gap
+    var card = track.querySelector('.{{ ns }}-card');
+    if(!card) return 0;
+    var cardW = card.getBoundingClientRect().width;
+    var cs = getComputedStyle(track);
+    var gap = parseFloat(cs.columnGap || cs.gap || 0);
+    return Math.round(cardW + (isNaN(gap) ? 0 : gap));
+  }
+
+  function updateArrows(){
+    var cards = track.querySelectorAll('.{{ ns }}-card').length;
+    var show  = isDesktop() && cards > 4;
+    prev.hidden = next.hidden = !show;
+    if(!show) return;
+
+    var maxScroll = track.scrollWidth - track.clientWidth - 2;
+    prev.toggleAttribute('disabled', track.scrollLeft <= 1);
+    next.toggleAttribute('disabled', track.scrollLeft >= maxScroll);
+  }
+
+  function scrollByDir(dir){
+    var step = getStep();
+    track.scrollTo({ left: track.scrollLeft + (dir * step), behavior: 'smooth' });
+    setTimeout(updateArrows, 350);
+  }
+
+  next.addEventListener('click', function(){ scrollByDir(+1); });
+  prev.addEventListener('click', function(){ scrollByDir(-1); });
+  track.addEventListener('scroll', function(){ if(isDesktop()) updateArrows(); }, { passive:true });
+
+  /* ---------- Hide native scrollbar on mobile & drive nf-progress ---------- */
+
+  // Inject a tiny style once to hide native bars when we add the helper class
+  (function ensureNoScrollbarCSS(){
+    var id = '{{ ns }}-no-scrollbar-style';
+    if(document.getElementById(id)) return;
+    var s = document.createElement('style');
+    s.id = id;
+    s.textContent = `
+      .{{ ns }}-track.no-native-scrollbar{ scrollbar-width: none; }
+      .{{ ns }}-track.no-native-scrollbar::-webkit-scrollbar{ display: none; }
+    `;
+    document.head.appendChild(s);
+  })();
+
+  function toggleMobileScrollbar(){
+    // Only show nf-progress and hide native scrollbar on mobile
+    if(isMobile()){
+      track.classList.add('no-native-scrollbar');
+      thumb && (thumb.style.display = 'block');  // ensure visible
+    }else{
+      track.classList.remove('no-native-scrollbar');
+      thumb && (thumb.style.transform = 'translateX(0)');
+      thumb && (thumb.style.display = '');       // respect CSS
+    }
+  }
+
+  function moveThumb(){
+    if(!thumb) return;
+
+    if(!isMobile()){
+      thumb.style.transform = 'translateX(0)';
+      return;
+    }
+    var barWidth  = thumb.offsetWidth || 70;     // your spec
+    var viewW     = track.clientWidth;
+    var contentW  = track.scrollWidth;
+    var maxScroll = Math.max(1, contentW - viewW);
+    var ratio     = Math.min(1, Math.max(0, track.scrollLeft / maxScroll));
+
+    var travel = Math.max(0, viewW - barWidth);
+    var x = ratio * travel;
+
+    thumb.style.transform = 'translateX(' + x + 'px)';
+  }
+
+  // Bind once
+  if(!track.dataset.nfProgressBound){
+    track.addEventListener('scroll', moveThumb, { passive:true });
+    // Images may affect width → recalc after they load
+    track.querySelectorAll('img').forEach(function(img){
+      if(!img.complete){
+        img.addEventListener('load', function(){ requestAnimationFrame(function(){ moveThumb(); updateArrows(); }); }, { once:true });
+      }
+    });
+    track.dataset.nfProgressBound = '1';
+  }
+
+  /* ---------- Resize handling ---------- */
+  function onResize(){
+    toggleMobileScrollbar();
+    requestAnimationFrame(function(){
+      moveThumb();
+      updateArrows();
+    });
+  }
+  window.addEventListener('resize', onResize, { passive:true });
+
+  /* ---------- Init ---------- */
+  toggleMobileScrollbar();
+  updateArrows();
+  requestAnimationFrame(moveThumb);
+})();
+</script>
+
+</section>
+{% schema %}
+{
+  "name": "Brand Slider",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Shop by Brands" },
+    { "type": "checkbox", "id": "show_counts", "label": "Show product counts", "default": true }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        { "type": "collection",   "id": "collection",       "label": "Collection" },
+        { "type": "image_picker", "id": "image",            "label": "Override image (optional)" },
+        { "type": "text",         "id": "cta_label",        "label": "CTA label", "default": "Shop Now" },
+
+        /* NEW — per-block visual controls */
+        { "type": "header", "content": "Card visual overrides" },
+        { "type": "color",  "id": "cta_bg",          "label": "Button background", "default": "#ffffff" },
+        { "type": "color",  "id": "cta_text",        "label": "Button text color", "default": "#111111" },
+        { "type": "color",  "id": "overlay_color",   "label": "Overlay color",     "default": "#000000" },
+        { "type": "range",  "id": "overlay_strength","label": "Overlay opacity (%)","min": 0, "max": 90, "step": 5, "unit": "%", "default": 55 },
+        { "type": "range",  "id": "grayscale",       "label": "Image grayscale (%)","min": 0, "max": 100, "step": 10, "unit": "%", "default": 0 }
+      ]
+    }
+  ],
+  "max_blocks": 24,
+  "presets": [
+    {
+      "name": "Brand Slider",
+      "blocks": [
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" },
+        { "type": "brand" }
+      ]
+    }
+  ]
+}
+{% endschema %}

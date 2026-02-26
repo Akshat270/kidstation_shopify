@@ -1,0 +1,297 @@
+{% schema %}
+{
+  "name": "Fresh Deals",
+  "settings": [
+    { "type": "text",  "id": "section_title",    "label": "Section Title",        "default": "Fresh Deals: Something New" },
+    { "type": "text",  "id": "highlighted_title","label": "Highlighted Title",    "default": "Every Day" },
+
+    /* NEW: highlighted text style */
+    { "type": "color", "id": "highlight_color",  "label": "Highlighted text color","default": "#0f4264" },
+    { "type": "color", "id": "highlight_bg",     "label": "Highlighted bg color", "default": "#EAF4FB" },
+
+    /* NEW: layout controls */
+    { "type": "range", "id": "desktop_columns",  "label": "Desktop cards per row (no slider)", "min": 2, "max": 5, "step": 1, "default": 2 },
+    { "type": "select","id": "mobile_mode",      "label": "Mobile layout", "default": "carousel",
+      "options": [
+        { "value": "carousel", "label": "Carousel (scrollable)" },
+        { "value": "grid2",    "label": "Grid (2 per row)" }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "deal",
+      "name": "Deal Item",
+      "settings": [
+        { "type": "product",      "id": "deal_product", "label": "Select Product (optional)" },
+        { "type": "text",         "id": "manual_title", "label": "Manual Title (if no product)" },
+        { "type": "text",         "id": "manual_price", "label": "Manual Price (if no product)" },
+        { "type": "image_picker", "id": "manual_image", "label": "Manual Image (if no product)" },
+        { "type": "url",          "id": "manual_link",  "label": "Manual Link (if no product)" },
+        { "type": "text",          "id": "manual_button_title",  "label": "Manual Title" },
+        { "type": "color",        "id": "bg_color",     "label": "Card background color", "default": "#FFF5E5" },
+
+        /* Per-card visual controls */
+        { "type": "color",        "id": "title_color",  "label": "Title color",  "default": "#000000" },
+        { "type": "color",        "id": "price_color",  "label": "Price color",  "default": "#000000" },
+        { "type": "color",        "id": "btn_bg",       "label": "Button background", "default": "#186599" },
+        { "type": "color",        "id": "btn_text",     "label": "Button text color", "default": "#FFFFFF" }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [{ "name": "Fresh Deals", "category": "Custom" }]
+}
+{% endschema %}
+
+{%- assign total_cards = section.blocks.size -%}
+{%- assign desktop_cols = section.settings.desktop_columns | default: 2 -%}
+{%- assign mobile_mode  = section.settings.mobile_mode   | default: 'carousel' -%}
+{%- assign use_desktop_slider = total_cards | plus: 0 | gt: 5 -%}
+
+<div class="fresh-deals {% if mobile_mode == 'grid2' %}is-mobile-grid{% endif %}"
+     data-desktop-slider="{{ use_desktop_slider }}"
+     data-mobile-mode="{{ mobile_mode }}"
+     style="--fd-cols: {{ desktop_cols }}; --hl-color: {{ section.settings.highlight_color }}; --hl-bg: {{ section.settings.highlight_bg }};">
+  <div class="fd-head">
+    <h2 class="deals-heading">
+      {{ section.settings.section_title }}
+      <span class="highlighted_title_text">{{ section.settings.highlighted_title }}</span>
+    </h2>
+
+    {%- if use_desktop_slider -%}
+      <div class="fd-navs">
+        <button class="fd-nav fd-prev" type="button" aria-label="Previous">←</button>
+        <button class="fd-nav fd-next" type="button" aria-label="Next">→</button>
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="deals-wrapper {% if use_desktop_slider %}is-desktop-slider{% else %}is-desktop-grid{% endif %}">
+    {% for block in section.blocks %}
+      {% assign product = all_products[block.settings.deal_product] %}
+
+      {%- assign _title_color = block.settings.title_color | default: '#000000' -%}
+      {%- assign _price_color = block.settings.price_color | default: '#000000' -%}
+      {%- assign _btn_bg      = block.settings.btn_bg      | default: '#186599' -%}
+      {%- assign _btn_text    = block.settings.btn_text    | default: '#ffffff' -%}
+
+      <article class="deal-card"
+        style="background-color: {{ block.settings.bg_color }};
+              --deal-title-color: {{ _title_color }};
+              --deal-price-color: {{ _price_color }};
+              --deal-btn-bg: {{ _btn_bg }};
+              --deal-btn-color: {{ _btn_text }};
+      ">
+        <div class="deal-media">
+          {% if block.settings.deal_product != blank and product and product.featured_image %}
+            <img src="{{ product.featured_image | img_url: '800x800' }}" alt="{{ product.title | escape }}">
+          {% elsif block.settings.manual_image != blank %}
+            <img src="{{ block.settings.manual_image | img_url: '800x800' }}" alt="{{ block.settings.manual_title | escape }}">
+          {% endif %}
+        </div>
+
+        <h3 class="deal-title">
+          {% if block.settings.deal_product != blank and product %}
+            {{ product.title }}
+          {% else %}
+            {{ block.settings.manual_title }}
+          {% endif %}
+        </h3>
+
+        <div class="deal-meta">
+          <span class="deal-price">
+            {% if block.settings.deal_product != blank and product %}
+              {{ product.price | money_without_trailing_zeros }}
+            {% else %}
+              {{ block.settings.manual_price }}
+            {% endif %}
+          </span>
+        </div>
+
+        <a href="{% if block.settings.deal_product != blank and product %}{{ product.url }}{% else %}{{ block.settings.manual_link }}{% endif %}"
+          class="deal-btn"
+        >
+          {{ block.settings.manual_button_title }}
+        </a>
+      </article>
+    {% endfor %}
+  </div>
+
+  <!-- Mobile-only progress thumb (only when mobile_mode = carousel) -->
+  <div class="nf-progress"></div>
+</div>
+
+<style>
+/* Container */
+.fresh-deals{
+  max-width:1300px;margin:0 auto;padding:48px 0;box-sizing:border-box;
+}
+
+/* Title with inline highlight chip */
+.fd-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.deals-heading{font-size:30px;font-weight:600;margin:0 0 20px;color:#000}
+.highlighted_title_text{
+  color: var(--hl-color, #0f4264);
+  background: var(--hl-bg, transparent);
+  padding: 2px 8px; border-radius: 6px; margin-left: 6px;
+}
+
+/* Desktop layout: grid OR slider */
+.deals-wrapper{align-items:stretch}
+.deals-wrapper.is-desktop-grid{
+  display:grid; grid-template-columns:repeat(var(--fd-cols,2),1fr); gap:28px;
+}
+.deals-wrapper.is-desktop-slider{
+  display:flex; gap:28px; overflow-x:hidden; scroll-behavior:smooth; position:relative;
+}
+
+/* Card */
+.deal-card{
+  border-radius:14px;padding:30px;box-sizing:border-box;overflow:hidden;position:relative;
+  display:flex;flex-direction:column;gap:12px;min-width:0;
+}
+.deal-media{display:flex;align-items:center;justify-content:center}
+.deal-media img{width:100%;height:auto;display:block;border-radius:14px;object-fit:contain}
+
+.deal-title{font-size:20px;font-weight:500;color:var(--deal-title-color,#000);margin:0;line-height:1.3}
+.deal-meta{font-size:18px;font-weight:500;color:var(--deal-price-color,#000)}
+.deal-price{color:inherit}
+.deal-btn{
+  display:inline-block;background:var(--deal-btn-bg,#0f4264);color:var(--deal-btn-color,#fff);
+  padding:9px 14px;border-radius:6px;font-size:14px;text-decoration:none;font-weight:600;width:100%;text-align:center;
+}
+
+/* Desktop slider navs show only when slider is active (and only on desktop) */
+.fd-navs{display:none;gap:10px}
+.fresh-deals[data-desktop-slider="true"] .fd-navs{display:flex}
+.fd-nav{
+  width:44px;height:44px;border-radius:999px;border:0;background:#0f4264;color:#fff;cursor:pointer;
+  display:grid;place-items:center;box-shadow:0 12px 24px rgba(0,0,0,.18)
+}
+
+/* Mobile progress thumb (carousel only) */
+.nf-progress{
+  height:4px;width:70px;margin-top:10px;background:#0f4264;border-radius:999px;display:none;
+  transform:translateX(0);transition:transform 160ms linear;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 767px){
+  .fresh-deals{ padding:28px 16px; }
+  .deals-heading{ font-size:22px; line-height:32px; margin-bottom:12px; }
+
+  /* MODE: carousel */
+  .fresh-deals[data-mobile-mode="carousel"] .deals-wrapper{
+    display:flex; overflow-x:auto; gap:16px; -webkit-overflow-scrolling:touch; padding-bottom:8px;
+  }
+  .fresh-deals[data-mobile-mode="carousel"] .deal-card{
+    flex:0 0 92%; min-width:92%; max-width:92%; padding:22px; gap:10px;
+  }
+  .fresh-deals[data-mobile-mode="carousel"] .nf-progress{ display:block; }
+
+  /* Hide native scrollbar when using our progress thumb */
+  .fresh-deals[data-mobile-mode="carousel"] .deals-wrapper{ scrollbar-width:none; }
+  .fresh-deals[data-mobile-mode="carousel"] .deals-wrapper::-webkit-scrollbar{ display:none; }
+
+  /* MODE: grid2 */
+  .fresh-deals[data-mobile-mode="grid2"] .deals-wrapper{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:16px; overflow:visible;
+  }
+  .fresh-deals[data-mobile-mode="grid2"] .deal-card{ padding:18px; }
+  .fresh-deals[data-mobile-mode="grid2"] .nf-progress{ display:none !important; }
+
+  /* Always hide desktop navs on mobile */
+  .fd-navs{ display:none !important; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const root    = document.querySelector('.fresh-deals');
+  if (!root) return;
+
+  const wrapper = root.querySelector('.deals-wrapper');
+  const thumb   = root.querySelector('.nf-progress');
+  const prevBt  = root.querySelector('.fd-prev');
+  const nextBt  = root.querySelector('.fd-next');
+
+  const mobileMode = root.dataset.mobileMode || 'carousel';
+  const desktopSliderEnabled = root.dataset.desktopSlider === 'true';
+
+  /* ========= Equal heights on desktop ========= */
+  function equalizeHeights() {
+    const cards = Array.from(wrapper.querySelectorAll('.deal-card'));
+    cards.forEach(c => (c.style.height = ''));
+    if (window.innerWidth >= 1024 && cards.length) {
+      let max = 0;
+      cards.forEach(c => { const h = c.getBoundingClientRect().height; if (h > max) max = h; });
+      cards.forEach(c => (c.style.height = Math.ceil(max) + 'px'));
+    }
+  }
+  equalizeHeights();
+
+  /* ========= Desktop slider arrows (if total > 5) ========= */
+  function isDesktop(){ return window.innerWidth >= 1024; }
+  function cardStep(){
+    const card = wrapper.querySelector('.deal-card'); if (!card) return 0;
+    const r = card.getBoundingClientRect();
+    const gap = parseFloat(getComputedStyle(wrapper).columnGap || getComputedStyle(wrapper).gap || 0);
+    return Math.round(r.width + (isNaN(gap)?0:gap));
+  }
+  function updateArrowState(){
+    if (!(desktopSliderEnabled && isDesktop())) return;
+    const max = wrapper.scrollWidth - wrapper.clientWidth - 2;
+    if (prevBt) prevBt.disabled = wrapper.scrollLeft <= 1;
+    if (nextBt) nextBt.disabled = wrapper.scrollLeft >= max;
+  }
+  function scrollDir(dir){
+    wrapper.scrollTo({ left: wrapper.scrollLeft + dir*cardStep(), behavior:'smooth' });
+    setTimeout(updateArrowState, 300);
+  }
+  if (desktopSliderEnabled && prevBt && nextBt){
+    prevBt.addEventListener('click', () => scrollDir(-1));
+    nextBt.addEventListener('click', () => scrollDir(+1));
+    wrapper.addEventListener('scroll', () => { if (isDesktop()) updateArrowState(); }, {passive:true});
+    updateArrowState();
+  }
+
+  /* ========= Mobile progress thumb (carousel mode only) ========= */
+  function moveThumb() {
+    if (!thumb || mobileMode !== 'carousel') return;
+    if (window.innerWidth >= 768) { thumb.style.transform = 'translateX(0)'; return; }
+    const barWidth  = thumb.offsetWidth || 70;
+    const viewW     = wrapper.clientWidth;
+    const contentW  = wrapper.scrollWidth;
+    const maxScroll = Math.max(1, contentW - viewW);
+    const ratio     = Math.min(1, Math.max(0, wrapper.scrollLeft / maxScroll));
+    const travel    = Math.max(0, viewW - barWidth);
+    thumb.style.transform = 'translateX(' + (ratio * travel) + 'px)';
+  }
+  if (mobileMode === 'carousel') {
+    wrapper.addEventListener('scroll', moveThumb, { passive:true });
+    const imgs = wrapper.querySelectorAll('img');
+    imgs.forEach(img => { if (!img.complete) img.addEventListener('load', () => requestAnimationFrame(moveThumb), { once:true }); });
+    requestAnimationFrame(moveThumb);
+
+    /* Optional drag-to-scroll enhancement */
+    if (window.innerWidth < 768) {
+      let isDown = false, startX = 0, startL = 0;
+      wrapper.addEventListener('pointerdown', e => { isDown = true; startX = e.clientX; startL = wrapper.scrollLeft; wrapper.style.cursor='grabbing'; });
+      window.addEventListener('pointerup', () => { isDown = false; wrapper.style.cursor=''; });
+      wrapper.addEventListener('pointermove', e => { if (!isDown) return; e.preventDefault(); wrapper.scrollLeft = startL - (e.clientX - startX); });
+    }
+  }
+
+  /* ========= Resize handling ========= */
+  let rTO;
+  window.addEventListener('resize', function(){
+    clearTimeout(rTO);
+    rTO = setTimeout(function(){
+      equalizeHeights();
+      updateArrowState();
+      moveThumb();
+    }, 120);
+  });
+});
+</script>

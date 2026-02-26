@@ -1,0 +1,180 @@
+{% comment %}
+  Section: Collection Banner (Metafields)
+  Uses collection metafield (file/image) references:
+    - Desktop: collection.metafields.custom.banner_image_desktop
+    - Mobile:  collection.metafields.custom.banner_image_mobile
+
+  If your namespace differs, replace 'custom' below with your namespace.
+  (e.g. collection.metafields.yournamespace.banner_image_desktop)
+{% endcomment %}
+
+<section class="collection-banner-sec" data-section-type="collection-banner">
+  {%- liquid
+    assign ns = 'custom'
+
+    assign desktop_file = collection.metafields[ns].banner_image_desktop
+    assign mobile_file  = collection.metafields[ns].banner_image_mobile
+
+    # Optional fallback: if no metafield image, fall back to collection.image
+    if desktop_file == blank and collection.image
+      assign desktop_fallback = collection.image
+    endif
+
+    # Alt text: prefer collection title
+    assign alt_text = section.settings.alt_text | default: collection.title
+  -%}
+
+  <div class="collection-banner-inner {% if section.settings.full_bleed == false %}container{% endif %}"
+       style="--banner-radius: {{ section.settings.corner_radius }}px;">
+
+    <figure class="collection-banner-figure {% if section.settings.cover_mode %}is-cover{% endif %}">
+      <picture>
+        {%- if mobile_file != blank -%}
+          <!-- Mobile-first source -->
+          <source media="(max-width: 749px)"
+                  srcset="
+                    {{ mobile_file  | image_url: width:  640 }}  640w,
+                    {{ mobile_file  | image_url: width:  828 }}  828w,
+                    {{ mobile_file  | image_url: width: 1080 }} 1080w,
+                    {{ mobile_file  | image_url: width: 1242 }} 1242w">
+          {%- elsif desktop_file != blank -%}
+          <!-- If no mobile metafield provided, let desktop handle all sizes -->
+          <source media="(max-width: 749px)"
+                  srcset="
+                    {{ desktop_file | image_url: width:  640 }}  640w,
+                    {{ desktop_file | image_url: width:  828 }}  828w,
+                    {{ desktop_file | image_url: width: 1080 }} 1080w">
+        {%- endif -%}
+
+        {%- if desktop_file != blank -%}
+          <img
+            class="collection-banner-img"
+            src="{{ desktop_file | image_url: width: 1920 }}"
+            srcset="
+              {{ desktop_file | image_url: width: 1200 }} 1200w,
+              {{ desktop_file | image_url: width: 1600 }} 1600w,
+              {{ desktop_file | image_url: width: 1920 }} 1920w,
+              {{ desktop_file | image_url: width: 2560 }} 2560w"
+            sizes="(max-width: 749px) 100vw, 100vw"
+            alt="{{ alt_text | escape }}"
+            loading="eager"
+            fetchpriority="high"
+            width="1920" height="700">
+        {%- elsif desktop_fallback != blank -%}
+          <img
+            class="collection-banner-img"
+            src="{{ desktop_fallback | image_url: width: 1920 }}"
+            srcset="
+              {{ desktop_fallback | image_url: width: 1200 }} 1200w,
+              {{ desktop_fallback | image_url: width: 1600 }} 1600w,
+              {{ desktop_fallback | image_url: width: 1920 }} 1920w"
+            sizes="(max-width: 749px) 100vw, 100vw"
+            alt="{{ alt_text | escape }}"
+            loading="eager"
+            fetchpriority="high"
+            width="1920" height="700">
+        {%- else -%}
+          <div class="collection-banner-placeholder">
+            <span>Set collection metafields for banner images</span>
+          </div>
+        {%- endif -%}
+      </picture>
+
+      {%- if section.settings.show_title or section.settings.show_breadcrumbs -%}
+      <figcaption class="collection-banner-caption">
+        {%- if section.settings.show_breadcrumbs -%}
+          <nav class="cb-breadcrumbs" aria-label="Breadcrumb">
+            <a href="{{ routes.root_url }}">Home</a>
+            <span aria-hidden="true">/</span>
+            <span class="is-current">{{ collection.title }}</span>
+          </nav>
+        {%- endif -%}
+        {%- if section.settings.show_title -%}
+          <h1 class="cb-title" style="color: {{ section.settings.title_color }};">{{ collection.title }}</h1>
+        {%- endif -%}
+      </figcaption>
+      {%- endif -%}
+    </figure>
+  </div>
+
+  <style>
+    .collection-banner-sec { margin: 0 0 18px; }
+    .collection-banner-sec .container { max-width: {{ settings.page_width | default: 1200 }}px; margin: 0 auto; padding: 0 16px; }
+
+    .collection-banner-figure {
+      position: relative;
+      border-radius: var(--banner-radius, 12px);
+      overflow: hidden;
+      background: #f6f7f8;
+      margin: 0;
+    }
+
+    .collection-banner-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1440 / 480;
+      object-fit: cover;
+    }
+
+    .collection-banner-figure.is-cover .collection-banner-img {
+      {% comment %} height: clamp(180px, 34vw, 420px); {% endcomment %}
+      height: auto;
+      aspect-ratio: auto; /* explicit height drives aspect */
+      object-fit: cover;
+    }
+
+    .collection-banner-placeholder {
+      display: grid; place-items: center;
+      width: 100%; height: clamp(180px, 34vw, 420px);
+      background: repeating-linear-gradient(45deg,#f2f2f2,#f2f2f2 12px,#fafafa 12px,#fafafa 24px);
+      color: #777; font-size: 14px;
+      border-radius: var(--banner-radius, 12px);
+    }
+
+    .collection-banner-caption {
+      position: absolute; inset: auto 0 0 0;
+      padding: clamp(12px, 2vw, 24px);
+      background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.45) 90%);
+      color: #fff;
+      display: grid; gap: 6px;
+    }
+
+    .cb-breadcrumbs {
+      font-size: 12px; opacity: .9; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    }
+    .cb-breadcrumbs a { color: #fff; text-decoration: none; }
+    .cb-breadcrumbs a:hover { text-decoration: underline; }
+
+    .cb-title {
+      margin: 0;
+      font-size: clamp(20px, 3.4vw, 36px);
+      line-height: 1.1;
+      text-shadow: 0 2px 14px rgba(0,0,0,.35);
+    }
+
+    @media (max-width: 749px){
+      .collection-banner-sec { margin-bottom: 12px; }
+      .collection-banner-figure.is-cover .collection-banner-img { height: clamp(160px, 44vw, 320px); }
+      .collection-banner-caption { padding: 12px; }
+    }
+  </style>
+</section>
+
+{% schema %}
+{
+  "name": "Collection Banner",
+  "settings": [
+    { "type": "checkbox", "id": "full_bleed", "label": "Full width (edge-to-edge)", "default": true },
+    { "type": "checkbox", "id": "cover_mode", "label": "Fixed banner height (cover)", "default": true },
+    { "type": "range", "id": "corner_radius", "label": "Corner radius", "min": 0, "max": 30, "step": 1, "default": 12 },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "Show breadcrumbs", "default": false },
+    { "type": "checkbox", "id": "show_title", "label": "Show collection title", "default": true },
+    { "type": "text", "id": "alt_text", "label": "Alt text (optional). Defaults to collection title."},
+    { "type": "color", "id": "title_color", "label": "Title color", "default": "#ffffff" }
+  ],
+  "presets": [
+    { "name": "Collection Banner (Metafields)" }
+  ]
+}
+{% endschema %}

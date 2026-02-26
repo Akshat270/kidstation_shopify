@@ -1,0 +1,117 @@
+{% schema %}
+{
+  "name": "Featured Icons Slider",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "icon",
+      "name": "Icon Item",
+      "settings": [
+        { "type": "image_picker", "id": "icon_image", "label": "Icon Image" },
+        { "type": "text", "id": "icon_text", "label": "Icon Text" },
+        { "type": "collection", "id": "icon_link", "label": "Collection" },
+
+        /* NEW: per-block controls */
+        { "type": "color", "id": "icon_bg", "label": "Icon background", "default": "#f1f3f5" },
+        { "type": "checkbox", "id": "show_badge", "label": "Show “NEW” badge", "default": false }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    { "name": "Featured Icons Slider", "category": "Custom" }
+  ]
+}
+{% endschema %}
+
+<div class="icons-slider-wrapper">
+  <div class="icons-slider">
+    {% for block in section.blocks %}
+      {% assign col = block.settings.icon_link %}
+      <a href="{{ col.url | default: '#' }}"
+         class="icon-item"
+         aria-label="{{ block.settings.icon_text | escape }}"
+         {{ block.shopify_attributes }}>
+        {% if block.settings.icon_image != blank %}
+          <div class="icon-circle" style="--icon-bg: {{ block.settings.icon_bg | default: '#f1f3f5' }};">
+            <img src="{{ block.settings.icon_image | img_url: '100x100' }}"
+                 alt="{{ block.settings.icon_text | escape }}">
+          </div>
+        {% endif %}
+        <span class="icon-text">{{ block.settings.icon_text }}</span>
+
+        {% if block.settings.show_badge %}
+          <span class="icon-badge">NEW</span>
+        {% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<style>
+.icons-slider-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.icons-slider-wrapper::-webkit-scrollbar { height: 6px; }
+.icons-slider-wrapper::-webkit-scrollbar-track { background: transparent; }
+.icons-slider-wrapper::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+.icons-slider {
+  display: flex;
+  justify-content: center;
+  padding: 25px 0;
+  min-width: 100%;
+  gap: 10px;
+}
+
+.icon-item {
+  position: relative;                /* for the badge */
+  flex: 0 0 calc(100% / 5 - 10px);
+  text-align: center;
+  text-decoration: none;
+  color: #333;
+}
+
+.icon-circle {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  background: var(--icon-bg, #f1f3f5); /* default gray */
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  margin: 0 auto;                    /* keep centered */
+}
+.icon-circle img { max-width: 60%; max-height: 60%; }
+
+.icon-text { font-size: 14px; display: block; }
+
+/* NEW: “NEW” badge */
+.icon-badge{
+  position: absolute;
+  top: 0px; right: 0px;
+  background: #ff2d2d;
+  color: #fff;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px rgba(0,0,0,.12);
+}
+
+/* Desktop - show 7 per row */
+@media (min-width: 1024px) {
+  .icon-item { flex: 0 0 calc(100% / 7 - 60px); text-align: -webkit-center !important; }
+  .icons-slider { gap: 0; }
+}
+
+/* Tablet / Mobile tweaks */
+@media (max-width: 991px){
+  .icons-slider { padding: 13px 10px; justify-content: flex-start; }
+  .icon-text { font-size: 10px; }
+}
+</style>

@@ -1,0 +1,365 @@
+{% comment %}
+  Renders a megamenu for the header.
+  Desktop: normal inline mega menu.
+  Mobile: this snippet also powers drawer previews (2 images + highlighted products)
+  without editing header-drawer.liquid, by injecting panels on tap.
+{% endcomment %}
+
+<nav class="header__inline-menu">
+  <ul class="list-menu list-menu--inline" role="list">
+    {%- for link in section.settings.menu.links -%}
+      <li>
+        {%- if link.links != blank -%}
+          <header-menu>
+            <details id="Details-HeaderMenu-{{ forloop.index }}" class="mega-menu">
+              <summary
+                id="HeaderMenu-{{ link.handle }}"
+                class="header__menu-item list-menu__item link focus-inset"
+              >
+                <span {% if link.child_active %}class="header__active-menu-item"{% endif %}>
+                  {{- link.title | escape -}}
+                </span>
+                {{- 'icon-caret.svg' | inline_asset_content -}}
+              </summary>
+
+              <div
+                id="MegaMenu-Content-{{ forloop.index }}"
+                class="mega-menu__content color-{{ section.settings.menu_color_scheme }} gradient motion-reduce global-settings-popup"
+                tabindex="-1"
+              >
+                <div class="mega-menu__content-inner page-width">
+                  {% comment %} {# LEFT: default columns #} {% endcomment %}
+                  <ul
+                    class="mega-menu__list{% if link.levels == 1 %} mega-menu__list--condensed{% endif %}"
+                    role="list"
+                  >
+                    {%- for childlink in link.links -%}
+                      <li>
+                        <a
+                          id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}"
+                          href="{{ childlink.url }}"
+                          class="mega-menu__link mega-menu__link--level-2 link{% if childlink.current %} mega-menu__link--active{% endif %}"
+                          {% if childlink.current %}aria-current="page"{% endif %}
+                          data-mega-handle="{{ childlink.handle }}"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          {{ childlink.title | escape }}
+                        </a>
+
+                        {%- if childlink.links != blank -%}
+                          <ul class="list-unstyled" role="list">
+                            {%- for grandchildlink in childlink.links -%}
+                              <li>
+                                <a
+                                  id="HeaderMenu-{{ link.handle }}-{{ childlink.handle }}-{{ grandchildlink.handle }}"
+                                  href="{{ grandchildlink.url }}"
+                                  class="mega-menu__link link{% if grandchildlink.current %} mega-menu__link--active{% endif %}"
+                                  {% if grandchildlink.current %}aria-current="page"%{% endif %}
+                                >
+                                  {{ grandchildlink.title | escape }}
+                                </a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+
+                  {% comment %} {# RIGHT: build one panel per promo block that matches this menu or its children #} {% endcomment %}
+                  {%- assign promo_blocks = section.blocks | where: 'type', 'mega_promo' -%}
+                  {%- assign default_panel = link.links.first.handle | default: link.handle -%}
+
+                  <div class="mega-menu__asides" data-default-panel="{{ default_panel }}">
+                    {%- for b in promo_blocks -%}
+                      {%- assign target = b.settings.menu_handle | handleize -%}
+
+                      {%- assign matches = false -%}
+                      {%- if target == link.handle -%}
+                        {%- assign matches = true -%}
+                      {%- else -%}
+                        {%- for childlink in link.links -%}
+                          {%- if target == childlink.handle -%}
+                            {%- assign matches = true -%}{%- break -%}
+                          {%- endif -%}
+                        {%- endfor -%}
+                      {%- endif -%}
+
+                      {%- if matches -%}
+                        <aside class="mega-menu__aside" data-mega-panel="{{ target }}">
+                          <div class="mega-menu__promos">
+                            {%- if b.settings.image_1 != blank -%}
+                              <a class="mega-menu__promo" href="{{ b.settings.image_1_link | default: '#' }}">
+                                {{ b.settings.image_1
+                                  | image_url: width: 600, height: 600, crop: 'center'
+                                  | image_tag: loading: 'lazy', alt: 'Promo 1' }}
+                              </a>
+                            {%- endif -%}
+                            {%- if b.settings.image_2 != blank -%}
+                              <a class="mega-menu__promo" href="{{ b.settings.image_2_link | default: '#' }}">
+                                {{ b.settings.image_2
+                                  | image_url: width: 600, height: 600, crop: 'center'
+                                  | image_tag: loading: 'lazy', alt: 'Promo 2' }}
+                              </a>
+                            {%- endif -%}
+                          </div>
+
+                          {%- assign col = b.settings.collection -%}
+                          {%- assign product_limit = b.settings.product_limit | default: 4 -%}
+                          {%- if col and col != blank and col.products_count > 0 -%}
+                            <div class="mega-menu__highlighted">
+                              <h3 class="mega-menu__highlighted-title">
+                                {{ b.settings.products_heading | default: 'Highlighted products' }}
+                              </h3>
+                              <ul class="mega-menu__highlighted-list" role="list">
+                                {%- for product in col.products limit: product_limit -%}
+                                  <li class="mega-menu__highlighted-item">
+                                    <a class="mega-menu__highlighted-link" href="{{ product.url }}">
+                                      <span class="mega-menu__highlighted-thumb">
+                                        {%- if product.featured_image -%}
+                                          {{ product.featured_image
+                                            | image_url: width: 160, height: 160, crop: 'center'
+                                            | image_tag: loading: 'lazy', alt: product.title | escape }}
+                                        {%- endif -%}
+                                      </span>
+                                      <span class="mega-menu__highlighted-info">
+                                        <span class="mega-menu__highlighted-name">{{ product.title }}</span>
+                                        <span class="mega-menu__highlighted-price">
+                                          {{ product.price | money }}
+                                          {%- if product.compare_at_price > product.price -%}
+                                            <s class="mega-menu__highlighted-compare">{{ product.compare_at_price | money }}</s>
+                                          {%- endif -%}
+                                        </span>
+                                      </span>
+                                    </a>
+                                  </li>
+                                {%- endfor -%}
+                              </ul>
+                            </div>
+                          {%- endif -%}
+                        </aside>
+                      {%- endif -%}
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            </details>
+          </header-menu>
+        {%- else -%}
+          <a
+            id="HeaderMenu-{{ link.handle }}"
+            href="{{ link.url }}"
+            class="header__menu-item list-menu__item link link--text focus-inset"
+            {% if link.current %}aria-current="page"{% endif %}
+          >
+            <span {% if link.current %}class="header__active-menu-item"{% endif %}>
+              {{- link.title | escape -}}
+            </span>
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>
+
+<style>
+/* Desktop layout: links (1) + aside area (3) */
+.mega-menu .mega-menu__content-inner {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 24px;
+}
+
+.mega-menu__asides { position: relative; }
+
+/* Panels hidden by default; JS toggles .is-active */
+.mega-menu__aside { display: none; }
+.mega-menu__aside.is-active {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-content: start;
+}
+
+/* Two square images */
+.mega-menu__promos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.mega-menu__promo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Highlighted products UI */
+.mega-menu__highlighted { padding-left: 20px; }
+.mega-menu__highlighted-title {
+  margin: 0 0 8px; font-weight: 700; font-size: 16px; text-transform: capitalize;
+}
+.mega-menu__highlighted-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.mega-menu__highlighted-link { display: grid; grid-template-columns: 64px 1fr; gap: 12px; text-decoration: none; }
+.mega-menu__highlighted-thumb img { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; }
+.mega-menu__highlighted-name { display: block; color: rgb(var(--color-foreground)); line-height: 1.25; font-size: 14px; }
+.mega-menu__highlighted-price { display: block; margin-top: 2px; color: #186599; font-weight: 600; }
+.mega-menu__highlighted-compare { opacity: .6; margin-left: 6px; color: rgba(0,0,0,0.5); }
+
+/* Drawer (mobile) preview styles – we reuse the same inner markup */
+.drawer-mega__panel { padding: 12px 16px 8px; }
+.drawer-mega__panel .mega-menu__promos {
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.drawer-mega__panel .mega-menu__highlighted { padding-left: 0; }
+.drawer-mega__panel .mega-menu__highlighted-thumb img { width: 48px; height: 48px; }
+
+/* Responsive */
+@media (max-width: 990px) {
+  .mega-menu .mega-menu__content-inner { grid-template-columns: 1fr; }
+  .mega-menu__aside.is-active { grid-template-columns: 1fr 1fr; }
+  .mega-menu__promos { grid-template-columns: 1fr 1fr; }
+  .mega-menu__highlighted { padding-left: 0; }
+}
+
+/* ===== Custom submenu background styling ===== */
+.mega-menu__link--level-2 {
+  display: block;
+  background-color: #0f4264;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 6px; /* gap between submenu items */
+  transition: all 0.25s ease;
+}
+
+/* Hover/focus state */
+.mega-menu__link--level-2:hover,
+.mega-menu__link--level-2:focus {
+  background-color: transparent;
+  color: #000;
+  text-decoration: none;
+  border: 1px solid #0f4264;
+}
+
+/* Optional: Make text not wrap too tightly */
+.mega-menu__link--level-2 span {
+  display: inline-block;
+}
+
+</style>
+
+<script>
+/*
+ Desktop: same hover/focus behaviour.
+ Mobile drawer: inject a cloned panel under the tapped submenu item.
+ This works without editing header-drawer.liquid.
+*/
+(function(){
+  var isMobile = function(){ return window.matchMedia('(max-width: 990px)').matches; };
+
+  // ===== DESKTOP MEGA =====
+  document.querySelectorAll('.mega-menu').forEach(function(menu){
+    var asidesWrap = menu.querySelector('.mega-menu__asides');
+    if (!asidesWrap) return;
+
+    var panels = menu.querySelectorAll('.mega-menu__aside[data-mega-panel]');
+    var defaultPanel = asidesWrap.getAttribute('data-default-panel') || '';
+
+    function setActive(handle){
+      panels.forEach(function(p){
+        var on = p.getAttribute('data-mega-panel') === handle;
+        p.classList.toggle('is-active', on);
+      });
+      menu.querySelectorAll('[data-mega-handle]').forEach(function(a){
+        a.setAttribute('aria-expanded', a.getAttribute('data-mega-handle') === handle ? 'true' : 'false');
+      });
+    }
+
+    // initial state for desktop panel
+    setActive(defaultPanel);
+
+    // Desktop switch on hover/focus
+    menu.querySelectorAll('.mega-menu__list a[data-mega-handle]').forEach(function(a){
+      var handle = a.getAttribute('data-mega-handle');
+      a.addEventListener('mouseenter', function(){ if (!isMobile()) setActive(handle); });
+      a.addEventListener('focus', function(){ if (!isMobile()) setActive(handle); });
+    });
+
+    // Reset to default when hovering the summary
+    var summary = menu.querySelector('summary');
+    if (summary){
+      summary.addEventListener('mouseenter', function(){ if (!isMobile()) setActive(defaultPanel); });
+    }
+  });
+
+  
+  {% comment %} function handleize(str){
+    return (str || '')
+      .toLowerCase()
+      .trim()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+  }
+
+  
+  var drawerRoots = document.querySelectorAll('.menu-drawer, .menu-drawer-container');
+  if (!drawerRoots.length) return;
+
+  
+  var panelMap = {};
+  document.querySelectorAll('.mega-menu__aside[data-mega-panel]').forEach(function(p){
+    panelMap[p.getAttribute('data-mega-panel')] = p;
+  });
+
+  drawerRoots.forEach(function(root){
+    root.addEventListener('click', function(e){
+      if (!isMobile()) return;
+
+      var link = e.target.closest('a');
+      if (!link) return;
+
+      
+      if (!link.classList || !link.classList.contains('menu-drawer__menu-item')) return;
+
+      
+      var txt = (link.textContent || '').replace(/\s+/g,' ').trim();
+      var handle = handleize(txt);
+      if (!handle) return;
+
+      
+      var src = panelMap[handle];
+      if (!src) return;
+
+      
+      if (!link.__previewShown) {
+        e.preventDefault();
+
+        
+        var li = link.closest('li') || link.parentElement;
+        if (!li) return;
+
+        
+        var list = li.parentElement;
+        list.querySelectorAll('.drawer-mega__panel').forEach(function(old){ old.remove(); });
+
+       
+        var mount = document.createElement('div');
+        mount.className = 'drawer-mega__panel';
+        mount.innerHTML = src.innerHTML; 
+        li.appendChild(mount);
+
+        
+        link.__previewShown = true;
+        clearTimeout(link.__pvTimer);
+        link.__pvTimer = setTimeout(function(){ link.__previewShown = false; }, 1200);
+      } 
+    }, {passive:false});
+  }); {% endcomment %}
+})();
+</script>

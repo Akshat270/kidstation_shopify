@@ -1,0 +1,382 @@
+{%- comment -%}
+  Customer Also Bought – desktop unchanged
+  Mobile: horizontal slider (hidden scrollbar) + visible nf-progress
+  ATC: force Monster Cart (no theme drawer fallbacks)
+{%- endcomment -%}
+
+{%- liquid
+  assign enabled       = block.settings.cab_enable | default: true
+  assign heading       = block.settings.cab_heading | default: 'Customer Also Bought'
+  assign coll          = block.settings.cab_collection
+  assign desktop_count = block.settings.cab_count_desktop | default: 4
+  assign mobile_count  = block.settings.cab_count_mobile  | default: 1
+
+  assign cta_bg         = block.settings.cab_cta_bg | default: '#2b5f8a'
+  assign cta_text       = block.settings.cab_cta_text | default: '#ffffff'
+  assign price_color    = block.settings.cab_price_color | default: '#1a6fd6'
+  assign title_color    = block.settings.cab_title_color | default: '#111111'
+  assign subtitle_color = block.settings.cab_subtitle_color | default: '#6b7280'
+  assign card_bg        = block.settings.cab_card_bg | default: '#f4f6f8'
+
+  assign uniq = section.id | append: '-' | append: block.id
+-%}
+
+{%- if enabled and coll and coll.products_count > 0 -%}
+  <div class="cab cab--{{ uniq }}"
+       data-cab-uniq="{{ uniq }}"
+       style="--cab-cta-bg: {{ cta_bg }}; --cab-cta-text: {{ cta_text }}; --cab-price: {{ price_color }}; --cab-title: {{ title_color }}; --cab-subtitle: {{ subtitle_color }}; --cab-card-bg: {{ card_bg }};">
+    <div class="cab__head">
+      <h2 class="cab__title">{{ heading | escape }}</h2>
+    </div>
+
+    {%- comment %} ===== DESKTOP (UNCHANGED) ===== {% endcomment -%}
+    <div class="cab__list cab__list--desktop">
+      {%- assign shown = 0 -%}
+      {%- for p in coll.products -%}
+        {%- if current_product and p.id == current_product.id -%}{% continue %}{%- endif -%}
+        {%- if shown >= desktop_count -%}{% break %}{%- endif -%}
+        {%- assign v = p.selected_or_first_available_variant -%}
+
+        <article class="cab-item" data-product-handle="{{ p.handle }}" data-variant-id="{{ v.id }}">
+          <a class="cab-item__media" href="{{ p.url }}">
+            {%- assign img = p.featured_media | default: p.media.first -%}
+            {%- if img -%}
+              {{ img | image_url: width: 180 | image_tag: loading: 'lazy', alt: img.alt | escape }}
+            {%- else -%}
+              {{ 'image' | placeholder_svg_tag }}
+            {%- endif -%}
+          </a>
+
+          <div class="cab-item__content">
+            <a class="cab-item__name" href="{{ p.url }}">{{ p.title | escape }}</a>
+
+            <div class="cab-item__row">
+              <div class="cab-item__price">
+                {%- render 'cab-price', product: p, use_variant: true -%}
+              </div>
+              <div class="cab-item__cta">
+                <form method="post"
+                    action="/cart/add"
+                    class="cab-atc"
+                    data-monstercart-ignore="true"
+                    data-product-id="{{ p.id }}">
+                    <input type="hidden" name="id" value="{{ v.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit"
+                            class="cab-btn"
+                            {% unless v.available %}disabled aria-disabled="true"{% endunless %}>
+                        {%- if v.available -%}{{ 'products.product.add_to_cart' | t }}{%- else -%}{{ 'products.product.sold_out' | t }}{%- endif -%}
+                    </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        {%- assign shown = shown | plus: 1 -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment %} ===== MOBILE (UPDATED) ===== {% endcomment -%}
+    <div class="cab__list cab__list--mobile" id="cabRoot-{{ uniq }}"
+         style="--cab-cpv: {{ mobile_count | at_least: 1 }};">
+      <div class="cab__scroll" id="cabScroll-{{ uniq }}">
+        {%- assign rendered = 0 -%}
+        {%- for p in coll.products -%}
+          {%- if current_product and p.id == current_product.id -%}{% continue %}{%- endif -%}
+          {%- if rendered >= 12 -%}{% break %}{%- endif -%}
+          {%- assign v = p.selected_or_first_available_variant -%}
+          {%- assign compare = v.compare_at_price | default: 0 -%}
+          {%- assign price   = v.price -%}
+          {%- assign off_pct = 0 -%}
+          {%- if compare > price -%}
+            {%- assign off_pct = compare | minus: price | times: 100 | divided_by: compare -%}
+          {%- endif -%}
+
+          <article class="cab-card" data-product-handle="{{ p.handle }}" data-variant-id="{{ v.id }}">
+            <div class="cab-card__inner">
+              <!-- ROW 1: image (left) + name + price (right) -->
+              <div class="cab-card__row1">
+                <a class="cab-card__media" href="{{ p.url }}">
+                  {%- assign img = p.featured_media | default: p.media.first -%}
+                  {%- if img -%}
+                    {{ img | image_url: width: 360 | image_tag: loading: 'lazy', alt: img.alt | escape }}
+                  {%- else -%}
+                    {{ 'image' | placeholder_svg_tag }}
+                  {%- endif -%}
+                </a>
+
+                <div class="cab-card__info">
+                  <a class="cab-card__name" href="{{ p.url }}">{{ p.title | escape }}</a>
+                  <div class="cab-card__price">
+                    <span class="cab-price__current">{{ price | money_without_trailing_zeros }}</span>
+                    {%- if compare > price -%}
+                      <span class="cab-price__compare">{{ compare | money_without_trailing_zeros }}</span>
+                      <span class="cab-price__off">(-{{ off_pct }}%)</span>
+                    {%- endif -%}
+                  </div>
+                </div>
+              </div>
+
+              <!-- ROW 2: full-width CTA -->
+                <form method="post"
+                    action="/cart/add"
+                    class="cab-atc"
+                    data-monstercart-ignore="true"
+                    data-product-id="{{ p.id }}">
+                    <input type="hidden" name="id" value="{{ v.id }}">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit"
+                            class="cab-btn cab-btn--block"
+                            {% unless v.available %}disabled aria-disabled="true"{% endunless %}>
+                        {{ 'products.product.add_to_cart' | t | capitalize }}
+                    </button>
+                </form>
+            </div>
+          </article>
+
+          {%- assign rendered = rendered | plus: 1 -%}
+        {%- endfor -%}
+      </div>
+
+      <!-- Visible progress bar -->
+      <div class="nf-progress" id="cabProgress-{{ uniq }}" aria-hidden="false"></div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+/* ===== Shared / heading ===== */
+.cab { margin:16px 0 8px; }
+.cab__head { margin-bottom:10px; }
+.cab__title { font-weight:600; font-size:20px; line-height:1.25; color:var(--cab-title); }
+
+/* Hide extra tax badges just in this widget */
+.cab .price__tax, .cab .product__tax, .cab .price__badges { display:none !important; }
+
+/* ===== Desktop (UNCHANGED) ===== */
+.cab__list--desktop { display:none; }
+@media (min-width:992px){ 
+    .cab__list--desktop{ 
+        display:grid; 
+        gap:16px; 
+    } 
+}
+.cab-item{ display:grid; grid-template-columns: 84px 1fr; gap:16px; align-items:center;
+  background:var(--cab-card-bg,#f4f6f8); border-radius:12px; padding:12px 16px; }
+.cab-item__media img{ width:84px; height:84px; object-fit:contain; display:block; }
+.cab-item__content{ display:grid; grid-template-rows:auto auto; row-gap:8px; }
+.cab-item__name{ font-size:15px; font-weight:700; color:var(--cab-title); -webkit-line-clamp:2; -webkit-box-orient:vertical; display:-webkit-box; overflow:hidden; text-decoration:none; }
+.cab-item__row{ display:grid; grid-template-columns: 1fr auto; align-items:center; column-gap:16px; }
+.cab-item__price .price-item--regular, .cab-item__price .price__sale .price-item--sale{ font-weight:800; font-size:20px; color:var(--cab-price) !important; }
+.cab-item__price .price__compare, .cab-item__price > .price-item--regular > del, .cab-item__price > .price-item--current{ color:#9ca3af !important; font-weight:700; opacity:.85; }
+.cab-btn{ appearance:none; border:0; border-radius:10px; background:var(--cab-cta-bg,#2b5f8a); color:var(--cab-cta-text,#fff); padding:13px 16px; font-size:14px; font-weight:800; cursor:pointer; white-space:nowrap; width:150px; text-transform:uppercase; }
+.cab-btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+/* ===== Mobile ===== */
+.cab__list--mobile{ display:block; }
+@media (min-width:992px){ .cab__list--mobile{ display:none; } }
+
+/* horizontal slider */
+.cab__scroll{
+  --gap:12px;
+  --cpv: var(--cab-cpv, 1);
+  display:grid; grid-auto-flow:column;
+  grid-auto-columns: calc(100% / var(--cpv) - var(--gap) * (var(--cpv) - 1) / var(--cpv));
+  gap:var(--gap); overflow-x:auto; overscroll-behavior-x:contain; scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch; padding:0 2px 14px 2px; scrollbar-width:none;
+}
+.cab__scroll::-webkit-scrollbar{ display:none; }
+
+.cab-card{ scroll-snap-align:start; }
+.cab-card__inner{
+  background:var(--cab-card-bg,#f4f6f8); border-radius:16px; padding:14px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02) inset;
+}
+
+/* ROW 1: image left, info right (title then price) */
+.cab-card__row1{
+  display:grid; grid-template-columns: 96px 1fr; column-gap:12px; align-items:start;
+}
+.cab-card__media{ display:block; border-radius:12px; overflow:hidden; background:#fff; }
+.cab-card__media img{ width:96px; height:96px; object-fit:contain; display:block; }
+
+.cab-card__info{ min-width:0; }
+.cab-card__name{
+  display:block; margin:2px 0 8px; font-size:16px; font-weight:700; line-height:1.25;
+  color:var(--cab-title,#111); text-decoration:none;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.cab-card__price{ display:flex; align-items:baseline; gap:10px; margin:0 0 4px; }
+.cab-price__current{ font-size:20px; font-weight:800; color:var(--cab-price,#1a6fd6); white-space:nowrap; }
+.cab-price__compare{ font-size:18px; text-decoration:line-through; opacity:.7; white-space:nowrap; }
+.cab-price__off{ font-weight:800; color:#ef4444; white-space:nowrap; }
+
+/* ROW 2: full-width CTA */
+.cab-btn--block{ width:100%; margin-top:10px; padding:14px; font-size:16px; font-weight:800;
+  border-radius:18px; background:var(--cab-cta-bg); color:var(--cab-cta-text); }
+
+/* progress bar (always visible on mobile) */
+.nf-progress{
+  position:relative; height:4px; width:100%; margin-top:10px; border-radius:999px;
+  overflow:visible; touch-action:none; display:block;
+}
+div:empty{
+  display: block;
+}
+.nf-progress::after{
+  content:""; position:absolute; top:0; bottom:0; left:0; width:70px;
+  background:var(--cab-cta-bg,#2b5f8a); border-radius:999px; pointer-events:auto;
+  transform: translateX(var(--cab-progress-x, 0px)); transition: transform 100ms linear;
+}
+@media (max-width: 989px){
+    span.cab-price__off{
+        display: none !important;
+    }
+}
+</style>
+<script>
+/* CAB — Form submit path, identical to your "Most Sold" working flow */
+(function(){
+  /* --- utilities (same ideas as your working section) --- */
+  function fetchSections(ids){
+    const url = (window.Shopify && Shopify.routes ? Shopify.routes.root : '/') + '?sections=' + ids.join(',');
+    return fetch(url, { credentials: 'same-origin', cache: 'no-store' }).then(r => r.json());
+  }
+
+  function injectSections(map){
+    const parser = new DOMParser();
+
+    // Icon bubble
+    if (map['cart-icon-bubble']) {
+      const d1 = parser.parseFromString(map['cart-icon-bubble'], 'text/html');
+      const nu = d1.querySelector('#cart-icon-bubble, #CartIcon-bubble');
+      const cu = document.querySelector('#cart-icon-bubble, #CartIcon-bubble');
+      if (nu && cu) cu.replaceWith(nu);
+    }
+
+    // Drawer (replace entire wrapper if present, else the element)
+    const html = map['cart-drawer'] || '';
+    if (html) {
+      const d2 = parser.parseFromString(html, 'text/html');
+
+      const nuSec = d2.querySelector('[id^="shopify-section-cart-drawer"]');
+      const cuSec = document.querySelector('[id^="shopify-section-cart-drawer"]');
+      if (nuSec && cuSec) { cuSec.replaceWith(nuSec); return; }
+
+      const nu = d2.querySelector('cart-drawer, #cart-drawer');
+      const cu = document.querySelector('cart-drawer, #cart-drawer');
+      if (nu && cu) cu.replaceWith(nu);
+      else if (nu && !cu) document.body.appendChild(nu);
+    }
+  }
+
+  async function openDrawer(){
+    const el = document.querySelector('cart-drawer, #cart-drawer');
+    try {
+      if (window.customElements && el && el.tagName.includes('CART-DRAWER')) {
+        await customElements.whenDefined(el.tagName.toLowerCase());
+      }
+    } catch(_){}
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    if (el && typeof el.open === 'function') { try { el.open(); return true; } catch(_){} }
+    try { el?.setAttribute('open',''); } catch(_){}
+    const t = document.querySelector('[data-cart-toggle],[aria-controls="CartDrawer"],.header__icon--cart,#cart-icon-bubble a');
+    if (t) { try { t.click(); return true; } catch(_){} }
+    return false;
+  }
+
+  function bindDrawerHandlers(){
+    const drawer = document.querySelector('cart-drawer, #cart-drawer');
+    if (!drawer) return;
+
+    drawer.addEventListener('click', function(e){
+      const rm = e.target.closest && e.target.closest('cart-remove-button');
+      if (rm && rm.dataset.index){
+        e.preventDefault();
+        changeLine(parseInt(rm.dataset.index,10), 0);
+      }
+    });
+
+    drawer.addEventListener('change', function(e){
+      const input = e.target.closest && e.target.closest('.quantity__input');
+      if (input && input.dataset.index){
+        let qty = parseInt(input.value,10);
+        if (isNaN(qty)) qty = 0;
+        changeLine(parseInt(input.dataset.index,10), qty);
+      }
+    });
+  }
+
+  function changeLine(line, qty){
+    fetch('/cart/change.js', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+      body: JSON.stringify({ line, quantity: qty }),
+      credentials: 'same-origin'
+    })
+    .then(r => r.json())
+    .then(() => fetchSections(['cart-drawer','cart-icon-bubble']))
+    .then(injectSections)
+    .then(openDrawer)
+    .catch(() => window.location.reload());
+  }
+
+  /* --- CAB form submit handler (same pattern as "Most Sold") --- */
+  function bindCABForms(ctx){
+    (ctx || document).querySelectorAll('form.cab-atc').forEach(form=>{
+      if (form.dataset.cabBound === '1') return;
+      form.dataset.cabBound = '1';
+      form.setAttribute('data-monstercart-ignore','true'); // ensure app doesn't hijack
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        const btn = form.querySelector('button[type="submit"]');
+        const orig = btn ? btn.innerHTML : '';
+        if (btn){ btn.disabled = true; btn.classList.add('is-loading'); btn.innerHTML = 'Adding…'; }
+
+        const fd = new FormData(form);
+        if (!fd.get('quantity')) fd.set('quantity','1');
+
+        fetch('/cart/add.js', {
+          method:'POST',
+          body: fd,
+          headers: { 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+          credentials: 'same-origin'
+        })
+        .then(r => { if(!r.ok) return r.json().then(j=>{ throw j; }); return r.json(); })
+        .then(() => fetchSections(['cart-drawer','cart-icon-bubble']))
+        .then(map => { injectSections(map); return map; })
+        .then(() => openDrawer())
+        .then(() => {
+          // small late pass to beat hydration
+          setTimeout(() => {
+            fetchSections(['cart-drawer']).then(injectSections).then(openDrawer).catch(()=>{});
+          }, 120);
+        })
+        .catch(() => { window.location.href = '/cart'; })
+        .finally(() => {
+          if (btn){
+            setTimeout(()=>{
+              btn.disabled = false; btn.classList.remove('is-loading');
+              btn.innerHTML = 'Added ✓';
+              setTimeout(()=> btn.innerHTML = orig, 900);
+            }, 200);
+          }
+        });
+      });
+    });
+  }
+  bindCABForms(document);
+
+  new MutationObserver(muts=>{
+    muts.forEach(m=>{
+      m.addedNodes && m.addedNodes.forEach(n=>{
+        if (!(n instanceof HTMLElement)) return;
+        if (n.matches?.('.cab, .cab__list, form.cab-atc') || n.querySelector?.('form.cab-atc')) bindCABForms(n);
+      });
+    });
+  }).observe(document.documentElement, { childList:true, subtree:true });
+})();
+</script>

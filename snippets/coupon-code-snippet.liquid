@@ -1,0 +1,175 @@
+{%- comment -%}
+Coupon Code Bars (Product)
+- Reads product metafields:
+  • 75_off            -> product.metafields.custom['75_off'].value
+  • on_orders_above   -> product.metafields.custom.on_orders_above.value
+  • save75            -> product.metafields.custom.save75.value
+
+  • 100_off           -> product.metafields.custom['100_off'].value
+  • on_orders_above_1 -> product.metafields.custom.on_orders_above_1.value
+  • flat75            -> product.metafields.custom.flat75.value
+
+  • 50_off            -> product.metafields.custom['50_off'].value
+  • on_orders_above_2 -> product.metafields.custom.on_orders_above_2.value
+  • welcome50         -> product.metafields.custom.welcome50.value
+
+Notes
+- Rows render ONLY if the corresponding coupon code metafield exists & is not blank.
+- Colors fall back to your provided defaults but can be overridden via section settings
+  (see Schema block below; snippet can read section.settings when included inside a section).
+{%- endcomment -%}
+
+{%- assign ns = 'coupon-bars-' | append: product.id -%}
+
+{%- assign c1_off = product.metafields.custom['75_off'].value -%}
+{%- assign c1_abv = product.metafields.custom.on_orders_above.value -%}
+{%- assign c1_code = product.metafields.custom.save75.value -%}
+
+{%- assign c2_off = product.metafields.custom['100_off'].value -%}
+{%- assign c2_abv = product.metafields.custom.on_orders_above_1.value -%}
+{%- assign c2_code = product.metafields.custom.flat75.value -%}
+
+{%- assign c3_off = product.metafields.custom['50_off'].value -%}
+{%- assign c3_abv = product.metafields.custom.on_orders_above_2.value -%}
+{%- assign c3_code = product.metafields.custom.welcome50.value -%}
+
+{%- comment -%} Theme-editor overrides (with design defaults) {%- endcomment -%}
+{%- assign c1_bg   = section.settings.c1_bg   | default: '#FDEBF1' -%}
+{%- assign c1_text = section.settings.c1_text | default: '#111111' -%}
+{%- assign c1_btn  = section.settings.c1_btn  | default: '#FFB4CD' -%}
+
+{%- assign c2_bg   = section.settings.c2_bg   | default: '#E3F5FE' -%}
+{%- assign c2_text = section.settings.c2_text | default: '#111111' -%}
+{%- assign c2_btn  = section.settings.c2_btn  | default: '#A9E1FB' -%}
+
+{%- assign c3_bg   = section.settings.c3_bg   | default: '#FFFBD3' -%}
+{%- assign c3_text = section.settings.c3_text | default: '#111111' -%}
+{%- assign c3_btn  = section.settings.c3_btn  | default: '#FFF27E' -%}
+
+{%- assign copy_label = section.settings.copy_label | default: 'Copy' -%}
+{%- assign copied_label = section.settings.copied_label | default: 'Copied' -%}
+
+{%- if c1_code or c2_code or c3_code -%}
+  <section class="{{ ns }}" data-coupons-root>
+    <style>
+      .{{ ns }}{ margin:16px 0; display:grid; gap:12px; }
+      .{{ ns }} .row{
+        border-radius:12px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between;
+      }
+      .{{ ns }} .left{
+        display:flex; flex-direction:column; gap:4px; font-weight:600;
+      }
+      .{{ ns }} .off{ font-size:20px; line-height:1.6; font-weight: 700;}
+      .{{ ns }} .above{ font-size:15px; font-weight:400; }
+      .{{ ns }} .right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+      .{{ ns }} .code{ font-size:15px; font-weight:500; letter-spacing:.4px; }
+      .{{ ns }} .copy-btn{
+        border:0; padding:10px 16px; border-radius:9999px; font-weight:500; cursor:pointer;font-size:13px;
+      }
+      @media (max-width: 749px){
+        .{{ ns }} .off{ font-size:16px; }
+        .{{ ns }} .above{ font-size:14px; }
+        .{{ ns }} .code{ font-size:14px; }
+      }
+    </style>
+
+    {%- comment -%} ROW 1 {%- endcomment -%}
+    {%- if c1_code != blank -%}
+      <div class="row" style="background: {{ c1_bg }}; color: {{ c1_text }};">
+        <div class="left">
+          {%- if c1_off -%}<div class="off">{{ c1_off }}</div>{%- endif -%}
+          {%- if c1_abv -%}<div class="above">{{ c1_abv }}</div>{%- endif -%}
+        </div>
+        <div class="right">
+          <div class="code">{{ c1_code }}</div>
+          <button class="copy-btn"
+            style="background: {{ c1_btn }};"
+            data-code="{{ c1_code | escape }}"
+            aria-label="Copy coupon code {{ c1_code }}">
+            {{ copy_label }}
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ROW 2 {%- endcomment -%}
+    {%- if c2_code != blank -%}
+      <div class="row" style="background: {{ c2_bg }}; color: {{ c2_text }};">
+        <div class="left">
+          {%- if c2_off -%}<div class="off">{{ c2_off }}</div>{%- endif -%}
+          {%- if c2_abv -%}<div class="above">{{ c2_abv }}</div>{%- endif -%}
+        </div>
+        <div class="right">
+          <div class="code">{{ c2_code }}</div>
+          <button class="copy-btn"
+            style="background: {{ c2_btn }};"
+            data-code="{{ c2_code | escape }}"
+            aria-label="Copy coupon code {{ c2_code }}">
+            {{ copy_label }}
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ROW 3 {%- endcomment -%}
+    {%- if c3_code != blank -%}
+      <div class="row" style="background: {{ c3_bg }}; color: {{ c3_text }};">
+        <div class="left">
+          {%- if c3_off -%}<div class="off">{{ c3_off }}</div>{%- endif -%}
+          {%- if c3_abv -%}<div class="above">{{ c3_abv }}</div>{%- endif -%}
+        </div>
+        <div class="right">
+          <div class="code">{{ c3_code }}</div>
+          <button class="copy-btn"
+            style="background: {{ c3_btn }};"
+            data-code="{{ c3_code | escape }}"
+            aria-label="Copy coupon code {{ c3_code }}">
+            {{ copy_label }}
+          </button>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <div class="visually-hidden" aria-live="polite"></div>
+    <script>
+      (function(){
+        const root = document.currentScript.closest('[data-coupons-root]');
+        if(!root) return;
+        const live = root.querySelector('[aria-live]');
+        function setLive(msg){ if(live){ live.textContent = ''; setTimeout(()=>{ live.textContent = msg; }, 10);} }
+
+        async function copyText(txt){
+          try{
+            if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(txt);
+              return true;
+            }
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+            document.body.appendChild(ta); ta.select();
+            const ok = document.execCommand('copy');
+            ta.remove();
+            return ok;
+          }catch(e){ return false; }
+        }
+
+        root.addEventListener('click', async (e)=>{
+          const btn = e.target.closest('.copy-btn');
+          if(!btn) return;
+          const code = btn.getAttribute('data-code') || '';
+          const initial = btn.textContent.trim();
+          const copiedLbl = "{{ copied_label | escape }}";
+          const ok = await copyText(code);
+          if(ok){
+            btn.textContent = copiedLbl;
+            setLive('Coupon code copied: ' + code);
+            setTimeout(()=>{ btn.textContent = initial; }, 2000);
+          }else{
+            setLive('Could not copy. Please select and copy manually.');
+          }
+        });
+      })();
+    </script>
+  </section>
+{%- endif -%}

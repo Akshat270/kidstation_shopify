@@ -1,0 +1,76 @@
+{%- comment -%}
+Shipping / Delivery Highlights
+Renders up to 6 cards with icon + text.
+Uses block settings from the main-product section (block.type == 'shipping-delivery-code').
+{%- endcomment -%}
+
+{%- assign ns = 'sdc-' | append: section.id | append: '-' | append: block.id -%}
+{%- assign count = block.settings.sd_count | default: 3 -%}
+
+<section class="{{ ns }}">
+  <div class="{{ ns }}-grid" style="
+    --sdc-gap: {{ block.settings.sd_gap | default: 16 }}px;
+    --sdc-bg: {{ block.settings.sd_bg | default: '#ffffff' }};
+    --sdc-text: {{ block.settings.sd_text | default: '#0f4264' }};
+    --sdc-border: {{ block.settings.sd_border | default: '#d9e1e8' }};
+    --sdc-radius: {{ block.settings.sd_radius | default: 12 }}px;
+  ">
+    {%- for i in (1..count) -%}
+      {%- assign icon_key = 'sd_icon_' | append: i -%}
+      {%- assign text_key = 'sd_text_' | append: i -%}
+      {%- assign icon = block.settings[icon_key] -%}
+      {%- assign label = block.settings[text_key] -%}
+
+      {%- if icon != blank or label != blank -%}
+        <div class="{{ ns }}-card">
+          {%- if icon != blank -%}
+            <img
+              class="{{ ns }}-icon"
+              src="{{ icon | image_url: width: 96 }}"
+              alt="{{ label | escape }}"
+              loading="lazy"
+              width="48"
+              height="48"
+            >
+          {%- endif -%}
+          {%- if label != blank -%}
+            <div class="{{ ns }}-label">{{ label }}</div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+  .{{ ns }}-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:var(--sdc-gap);
+  }
+  @media (max-width: 749px){
+    .{{ ns }}-card{
+        display:flex; align-items:center; gap:8px;
+        padding:10px;
+        flex-direction: column;
+        text-align: center;
+    }
+    .{{ ns }}-icon{ width:35px; height:35px; object-fit:contain; }
+    .{{ ns }}-label{ font-weight:500; font-size: 10px !important;}
+  }
+  @media (min-width:750px){
+    .{{ ns }}-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+  }
+  .{{ ns }}-card{
+    display:flex; align-items:center; gap:12px;
+    padding:12px;
+    background:var(--sdc-bg);
+    color:var(--sdc-text);
+    border:1px solid var(--sdc-border);
+    border-radius:var(--sdc-radius);
+    flex-direction: column;
+    text-align: center;
+  }
+  .{{ ns }}-icon{ width:35px; height:35px; object-fit:contain; }
+  .{{ ns }}-label{ font-weight:500; font-size: 13px;}
+</style>

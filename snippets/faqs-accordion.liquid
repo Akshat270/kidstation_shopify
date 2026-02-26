@@ -1,0 +1,176 @@
+{%- comment -%}
+FAQs Accordion (Product)
+Items:
+  1) What's Included
+     - Title:  product.metafields.custom.what_s_included (single line)
+     - Answer: product.metafields.custom.what_s_included_answers (rich text)
+
+  2) Specifications
+     - Title:  product.metafields.custom.specifications (single line)
+     - Answer: product.metafields.custom.specifications_answer (rich text)
+
+  3) Product Details
+     - Title:  product.metafields.custom.product_details (single line)
+     - Answer: product.description (HTML)
+
+Block settings style only; content comes from metafields.
+{%- endcomment -%}
+
+{%- assign ns = 'faq-' | append: section.id | append: '-' | append: block.id -%}
+
+{%- assign t1 = product.metafields.custom.what_s_included -%}
+{%- assign a1 = product.metafields.custom.what_s_included_answers -%}
+
+{%- assign t2 = product.metafields.custom.specifications -%}
+{%- assign a2 = product.metafields.custom.specifications_answer -%}
+
+{%- assign t3 = product.metafields.custom.product_details -%}
+{%- assign a3_html = product.description -%}
+
+{%- assign open_first = block.settings.faq_open_first -%}
+{%- assign single_open = block.settings.faq_single_open -%}
+
+{%- capture style_vars -%}
+  --faq-divider: {{ block.settings.faq_divider | default: '#e5e7eb' }};
+  --faq-title:   {{ block.settings.faq_title | default: '#111111' }};
+  --faq-answer:  {{ block.settings.faq_answer | default: '#4b5563' }};
+  --faq-icon:    {{ block.settings.faq_icon | default: '#111111' }};
+  --faq-gap:     {{ block.settings.faq_gap | default: 12 }}px;
+  --faq-pad:     {{ block.settings.faq_pad | default: 12 }}px;
+  --faq-radius:  {{ block.settings.faq_radius | default: 0 }}px;
+{%- endcapture -%}
+
+<section class="{{ ns }}-wrap" style="{{ style_vars | strip }}">
+  <div class="{{ ns }}-list" data-single-open="{{ single_open }}">
+    {%- assign items = 0 -%}
+
+    {%- if t1 or a1 -%}
+      {%- assign items = items | plus: 1 -%}
+      <div class="{{ ns }}-item" {% if open_first and items == 1 %}data-open="true"{% endif %}>
+        <button class="{{ ns }}-head" type="button" aria-expanded="{% if open_first and items == 1 %}true{% else %}false{% endif %}">
+          <span class="{{ ns }}-title">{{ t1 | default: "What's Included" }}</span>
+          <svg class="{{ ns }}-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="{{ ns }}-panel" {% if open_first and items == 1 %}style="max-height:9999px"{% endif %}>
+          <div class="{{ ns }}-content">
+            {%- if a1 -%}
+              {{ a1 | metafield_tag }}
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if t2 or a2 -%}
+      {%- assign items = items | plus: 1 -%}
+      <div class="{{ ns }}-item" {% if open_first and items == 1 %}data-open="true"{% endif %}>
+        <button class="{{ ns }}-head" type="button" aria-expanded="{% if open_first and items == 1 %}true{% else %}false{% endif %}">
+          <span class="{{ ns }}-title">{{ t2 | default: "Specifications" }}</span>
+          <svg class="{{ ns }}-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="{{ ns }}-panel" {% if open_first and items == 1 %}style="max-height:9999px"{% endif %}>
+          <div class="{{ ns }}-content">
+            {%- if a2 -%}
+              {{ a2 | metafield_tag }}
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- if t3 or a3_html -%}
+      {%- assign items = items | plus: 1 -%}
+      <div class="{{ ns }}-item" {% if open_first and items == 1 %}data-open="true"{% endif %}>
+        <button class="{{ ns }}-head" type="button" aria-expanded="{% if open_first and items == 1 %}true{% else %}false{% endif %}">
+          <span class="{{ ns }}-title">{{ t3 | default: "Product Details" }}</span>
+          <svg class="{{ ns }}-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="{{ ns }}-panel" {% if open_first and items == 1 %}style="max-height:9999px"{% endif %}>
+          <div class="{{ ns }}-content">
+            {{ a3_html }}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+<style>
+  .{{ ns }}-wrap { border-radius: var(--faq-radius); }
+  .{{ ns }}-list { display: grid; gap: var(--faq-gap); }
+  .{{ ns }}-item { border-bottom: 1px solid var(--faq-divider); }
+  .{{ ns }}-head {
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    gap: 12px; padding: var(--faq-pad) 0; background:transparent; border:0; cursor:pointer;
+    color: var(--faq-title); font-weight: 600; text-align:left; font-size: 16px;
+  }
+  .{{ ns }}-title { line-height: 1.6; }
+  .{{ ns }}-icon { color: var(--faq-icon); transition: transform .2s ease; flex: 0 0 auto; }
+  .{{ ns }}-item[data-open="true"] .{{ ns }}-icon { transform: rotate(45deg); } /* “+” → “×” */
+
+  .{{ ns }}-panel {
+    overflow:hidden; max-height:0; transition:max-height .25s ease;
+  }
+  .{{ ns }}-content {
+    padding: 0 0 calc(var(--faq-pad) * 1.25) 0;
+    color: var(--faq-answer);
+    font-size: 14px;
+  }
+  .{{ ns }}-content :where(p,ul,ol){ margin: .5em 0; }
+</style>
+
+<script>
+  (function(){
+    var root = document.currentScript.closest('section.{{ ns }}-wrap');
+    if(!root) root = document.querySelector('section.{{ ns }}-wrap');
+    if(!root) return;
+
+    var list = root.querySelector('.{{ ns }}-list');
+    var singleOpen = (list && list.getAttribute('data-single-open') === 'true');
+
+    root.querySelectorAll('.{{ ns }}-item').forEach(function(item){
+      var head = item.querySelector('.{{ ns }}-head');
+      var panel = item.querySelector('.{{ ns }}-panel');
+      if(!head || !panel) return;
+
+      head.addEventListener('click', function(){
+        var isOpen = item.getAttribute('data-open') === 'true';
+
+        if(singleOpen){
+          root.querySelectorAll('.{{ ns }}-item[data-open="true"]').forEach(function(openItem){
+            if(openItem !== item){
+              openItem.setAttribute('data-open','false');
+              var p = openItem.querySelector('.{{ ns }}-panel');
+              var h = openItem.querySelector('.{{ ns }}-head');
+              if(p){ p.style.maxHeight = 0; }
+              if(h){ h.setAttribute('aria-expanded','false'); }
+            }
+          });
+        }
+
+        if(isOpen){
+          item.setAttribute('data-open','false');
+          panel.style.maxHeight = 0;
+          head.setAttribute('aria-expanded','false');
+        }else{
+          item.setAttribute('data-open','true');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          head.setAttribute('aria-expanded','true');
+        }
+      });
+
+      // If pre-opened via data-open, set height once
+      if(item.getAttribute('data-open') === 'true'){
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        head.setAttribute('aria-expanded','true');
+      }
+    });
+  })();
+</script>

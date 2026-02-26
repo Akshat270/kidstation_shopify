@@ -1,0 +1,151 @@
+{% comment %}
+  Renders product price (compare, current, and discount %)
+  - No decimals (e.g., 2999 not 2999.00)
+  - Shows "MRP incl. of all taxes" note
+  - Replaces sale/sold-out badges with inline price presentation
+
+  Accepts:
+  - product
+  - placeholder (Boolean)
+  - use_variant (Boolean)
+  - price_class (String)
+  - show_compare_at_price (Boolean) — kept for compatibility (not required)
+{% endcomment %}
+{%- liquid
+  if use_variant
+    assign target = product.selected_or_first_available_variant
+  elsif placeholder
+    assign target = null
+  else
+    assign target = product
+  endif
+
+  assign available = target.available | default: false
+
+  # Resolve which object holds price data
+  # (When use_variant is false, target == product)
+  if target == null
+    assign price = 1999
+    assign compare_at_price = blank
+  else
+    assign price = target.price
+    assign compare_at_price = target.compare_at_price
+  endif
+
+  # "From" logic for products with varying prices when not using a variant
+  assign show_from = false
+  if target == product and product.price_varies
+    assign show_from = true
+  endif
+
+  # Build money strings without decimals
+  assign money_price = price | money_without_trailing_zeros
+  assign money_compare = compare_at_price | money_without_trailing_zeros
+
+  # Percent off (only when a real compare_at_price is greater than price)
+  assign show_sale = false
+  assign pct = 0
+  if compare_at_price and compare_at_price > price
+    assign show_sale = true
+    assign save = compare_at_price | minus: price
+    assign pct = save | times: 100.0 | divided_by: compare_at_price | round
+  endif
+-%}
+{%- unless target == null and placeholder == null -%}
+  <div
+    class="
+      price
+      {%- if price_class %} {{ price_class }}{% endif -%}
+      {%- if available == false %} price--sold-out{% endif -%}
+      {%- if show_sale %} price--on-sale{% endif -%}
+    "
+  >
+    <div class="price__container">
+      <div class="price__line">
+        {%- if show_sale -%}
+          <span class="price-item price-item--current">
+            {{ money_price }}
+          </span>
+          <s class="price-item price-item--compare">
+            {{ money_compare }}
+          </s>
+          <span class="price-item price-item--off">(-{{ pct }}%)</span>
+        {%- else -%}
+          <span class="price-item price-item--current">
+            {%- if show_from -%}
+              {{ 'products.product.price.from_price_html' | t: price: money_price }}
+            {%- else -%}
+              {{ money_price }}
+            {%- endif -%}
+          </span>
+        {%- endif -%}
+      </div>
+
+      {%- if product.selected_or_first_available_variant.unit_price_measurement -%}
+        {% render 'unit-price',
+          price: product.selected_or_first_available_variant.unit_price,
+          measurement: product.selected_or_first_available_variant.unit_price_measurement
+        %}
+      {%- endif -%}
+
+      <small class="price__tax-note">MRP incl. of all taxes</small>
+    </div>
+  </div>
+{%- endunless -%}
+
+{% if template == 'collection' %}
+  <style>
+    .price__line {
+      display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+    }
+    s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 18px;}
+    span.price-item--current { font-weight: bold; color: #0f4264; font-size: 20px;}
+    span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 18px;}
+    .price__tax-note { display: block; margin-top: 6px; opacity: .75; font-size: 14px;}
+
+    @media screen and (max-width: 991px){
+      s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 16px; color: rgba(0,0,0,0.5);}
+      span.price-item--current { font-weight: bold; color: #0f4264; font-size: 18px;}
+      span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 16px;}
+
+    }
+  </style>
+{% else %}  
+  <style>
+    .price .price__line {
+      display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+    }
+    s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 20px;}
+    span.price-item--current { font-weight: bold; color: #0f4264; font-size: 26px;}
+    span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 20px;}
+    .price .price__tax-note { display: block; margin-top: 6px; opacity: .75; font-size: 14px;}
+
+    @media screen and (max-width: 991px){
+      s.price-item--compare { opacity: .6; text-decoration: line-through; font-size: 20px; color: rgba(0,0,0,0.5);}
+      span.price-item--current { font-weight: bold; color: #0f4264; font-size: 24px;}
+      span.price-item--off { font-weight: 700; color: #ff3b30; font-size: 20px;}
+
+    }
+  </style>
+{% endif %}  
+{%- comment -%}
+  Currency codes:
+  ----------------
+  This snippet uses `money_without_trailing_zeros` to remove decimals (e.g., 2999).
+  If your store is set to show currency codes globally, Shopify doesn’t provide a
+  "money_without_trailing_zeros_with_currency" filter. If you must append codes,
+  you can do:
+    {{ price | money_without_trailing_zeros }} {{ cart.currency.iso_code }}
+  But most stores prefer symbol-only here.
+
+  Volume pricing:
+  ---------------
+  The original snippet had special handling for volume pricing ranges. If you
+  actively use Shopify Volume Pricing on this template and need that range UI,
+  let me know and I’ll add a conditional branch. For standard PDP/QS usage,
+  the inline compare/current/percent is what you requested.
+
+  Badges:
+  -------
+  The original "Sale" and "Sold Out" badges were removed as requested.
+{%- endcomment -%}

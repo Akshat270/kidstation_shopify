@@ -1,0 +1,766 @@
+{% assign ns = 'mswt-' | append: section.id %}
+{%- assign desktop_cols = section.settings.desktop_cols | default: 4 -%}
+{%- assign mobile_mode  = section.settings.mobile_mode  | default: 'slider' -%}
+{%- assign mobile_cols  = section.settings.mobile_cols  | default: 2 -%}
+{%- assign mpv          = section.settings.mobile_slider_cards_per_view | default: '1.5' -%}
+{%- assign mobile_show_scrollbar = section.settings.mobile_slider_show_scrollbar | default: true -%}
+
+<section
+  class="{{ ns }}-section"
+  data-section-id="{{ section.id }}"
+  data-mobile-mode="{{ mobile_mode }}"
+  data-mobile-progress="{{ mobile_show_scrollbar }}"
+  style="--{{ ns }}-cols-desktop: {{ desktop_cols }}; --{{ ns }}-cols-mobile: {{ mobile_cols }}; --{{ ns }}-cards-per-view: {{ mpv }};"
+>
+  <div class="{{ ns }}-container">
+    {% if section.settings.heading != blank %}
+      <h2 class="{{ ns }}-heading">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <!-- TABS -->
+    <div class="{{ ns }}-tabs" role="tablist" aria-label="{{ section.settings.heading | escape }}">
+      {% for block in section.blocks %}
+        <button
+          class="{{ ns }}-tab{% if forloop.first %} is-active{% endif %}"
+          role="tab"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          aria-controls="{{ ns }}-panel-{{ forloop.index }}"
+          id="{{ ns }}-tab-{{ forloop.index }}"
+          data-tab-index="{{ forloop.index }}">
+          {{ block.settings.title | default: block.settings.collection.title | default: 'Collection' }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <!-- PANELS -->
+    <div class="{{ ns }}-panels">
+      {% for block in section.blocks %}
+        {% assign col = block.settings.collection %}
+        {% assign limit = block.settings.limit | default: 20 %}
+        {% assign ad_pos = block.settings.ad_position | default: 3 %}
+        {% assign ad_slides_raw = block.settings.ad_slides | default: '' | replace: ' ', '' %}
+        {% assign ad_slides = ',' | append: ad_slides_raw | append: ',' %}
+        {% assign badge_csv = section.settings.badge_tags | default: '' | downcase | replace: ' ', '' %}
+        {% assign badge_list = badge_csv | split: ',' %}
+
+        <div
+          class="{{ ns }}-panel{% if forloop.first %} is-active{% endif %}"
+          id="{{ ns }}-panel-{{ forloop.index }}"
+          role="tabpanel"
+          aria-labelledby="{{ ns }}-tab-{{ forloop.index }}"
+          {% unless forloop.first %}hidden{% endunless %}
+          data-panel>
+          <div class="{{ ns }}-slider" data-slider>
+            <button class="{{ ns }}-nav {{ ns }}-prev" type="button" aria-label="Previous" hidden>
+              ←
+            </button>
+
+            <div class="{{ ns }}-track" data-track>
+              {% if col %}
+                {%- capture promo_card -%}
+                {% if block.settings.promo_enable %}
+                  <div class="{{ ns }}-promo" style="--promo-bg: {{ block.settings.promo_bg | default: '#eaf4fb' }}">
+                    <div class="{{ ns }}-promo-inner">
+                      {% if block.settings.promo_title != blank %}
+                        <h3 class="{{ ns }}-promo-title">{{ block.settings.promo_title }}</h3>
+                      {% endif %}
+                      {% if block.settings.promo_sub != blank %}
+                        <p class="{{ ns }}-promo-sub">{{ block.settings.promo_sub }}</p>
+                      {% endif %}
+                    </div>
+                    {% if block.settings.promo_image %}
+                      <img class="{{ ns }}-promo-img" src="{{ block.settings.promo_image | image_url: width: 900 }}" alt="{{ block.settings.promo_title | escape }}" loading="lazy">
+                    {% endif %}
+                    {% if block.settings.promo_cta_label != blank and block.settings.promo_cta_url != blank %}
+                      <a class="{{ ns }}-promo-cta" href="{{ block.settings.promo_cta_url }}">{{ block.settings.promo_cta_label }}</a>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {%- endcapture -%}
+
+                {% for product in col.products limit: limit %}
+                  {% assign slide_num = forloop.index0 | divided_by: 3 | plus: 1 %}
+                  {% assign mod = forloop.index | modulo: 3 %}
+                  {% assign pos_in_slide = mod %}{% if pos_in_slide == 0 %}{% assign pos_in_slide = 3 %}{% endif %}
+                  {% assign needle = ',' | append: slide_num | append: ',' %}
+                  {%- assign show_ad_this_slide = false -%}
+                  {% if ad_slides contains needle and block.settings.promo_enable %}
+                    {% assign show_ad_this_slide = true %}
+                  {% endif %}
+
+                  {% if show_ad_this_slide and ad_pos <= 3 and pos_in_slide == ad_pos %}
+                    {{ promo_card }}
+                  {% endif %}
+
+                  {% assign v = product.selected_or_first_available_variant %}
+                  {% if product.variants.size > 1 %}
+                    {% assign subtitle_val = v.metafields.custom.subtitle.value %}
+                  {% else %}
+                    {% assign subtitle_val = product.metafields.custom.subtitle.value %}
+                  {% endif %}
+
+                  {% assign p_tags = ',' | append: product.tags | join: ',' | downcase | append: ',' %}
+                  {% assign show_badge = false %}
+                  {% for t in badge_list %}
+                    {% if t != '' and p_tags contains t %}
+                      {% assign show_badge = true %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+
+                  {% assign second_image = product.images[1] %}
+
+                  <div class="{{ ns }}-item wishlist-card-item">
+                    <div class="{{ ns }}-card">
+                      <div class="wishlist-engine" data-product_id="{{  product.id }}" data-variant_id="{{ product.selected_or_first_available_variant.id }}" data-full_button="false" data-css="true"></div>
+
+                      <a class="{{ ns }}-link" href="{{ product.url }}">
+                        <div class="{{ ns }}-media">
+                          {% if product.featured_image %}
+                            <img class="{{ ns }}-img {{ ns }}-img--primary"
+                                 src="{{ product.featured_image | image_url: width: 900 }}"
+                                 loading="lazy"
+                                 alt="{{ product.title | escape }}">
+                            {% if second_image %}
+                              <img class="{{ ns }}-img {{ ns }}-img--hover"
+                                   src="{{ second_image | image_url: width: 900 }}"
+                                   loading="lazy"
+                                   alt="{{ product.title | escape }}">
+                            {% endif %}
+                          {% else %}
+                            <div class="{{ ns }}-ph">No image</div>
+                          {% endif %}
+
+                          {% if product.compare_at_price_max > product.price %}
+                            {%- assign custom_tag_obj        = product.metafields.custom.product_tag -%}
+                            {%- assign custom_tag_value      = custom_tag_obj.value | default: custom_tag_obj -%}
+
+                            {%- assign custom_tag_color_obj  = product.metafields.custom.product_tag_color -%}
+                            {%- assign custom_tag_color_val  = custom_tag_color_obj.value | default: custom_tag_color_obj -%}
+
+                            <div class="card__badge {{ settings.badge_position }}">
+                              {% style %}
+                                @media (max-width: 768px){
+                                  .badge{
+                                    position: absolute;
+                                    top: 3px;
+                                    left: 10px;
+                                  }
+                                }
+                              {% endstyle %}
+                              {%- if product.available == false -%}
+                                <span
+                                  id="NoMediaStandardBadge-{{ section.id }}-{{ product.id }}"
+                                  class="badge badge--bottom-left color-{{ settings.sold_out_badge_color_scheme }}"
+                                >
+                                  {{- 'products.product.sold_out' | t -}}
+                                </span>
+
+                              {%- elsif product.available and custom_tag_value != blank -%}
+                                <span
+                                  id="NoMediaStandardBadge-{{ section.id }}-{{ product.id }}"
+                                  class="badge badge--bottom-left color-{{ settings.sale_badge_color_scheme }}"
+                                  style="
+                                    {%- if custom_tag_color_val != blank -%}
+                                      background-color: {{ custom_tag_color_val }};
+                                      border-color: {{ custom_tag_color_val }};
+                                    {%- endif -%}
+                                  "
+                                >
+                                  {{ custom_tag_value }}
+                                </span>
+                              {%- endif -%}
+                            </div>
+                          {% endif %}
+                        </div>
+
+                        <div class="{{ ns }}-body">
+                          <div class="{{ ns }}-title">
+                            {{ product.title }}
+                          </div>
+
+                          <div class="slot slot--subtitle">
+                            {% assign current_variant = product.selected_or_first_available_variant %}
+
+                            {% if product.has_only_default_variant or current_variant == nil %}
+                              {% if product.metafields.custom.subtitle %}
+                                <p class="custom_subtitle_value_most">{{ product.metafields.custom.subtitle.value }}</p>
+                              {% endif %}
+                            {% else %}
+                              {% if current_variant.metafields.custom.subtitle %}
+                                <p class="custom_subtitle_value_most">{{ current_variant.metafields.custom.subtitle.value }}</p>
+                              {% elsif product.metafields.custom.subtitle %}
+                                <p class="custom_subtitle_value_most">{{ product.metafields.custom.subtitle.value }}</p>
+                              {% endif %}
+                            {% endif %}
+                          </div>
+
+                          <div class="slot slot--reviews">
+                            <div class="jdgm-widget jdgm-preview-badge" data-id="{{ product.id }}"></div>
+                          </div>
+
+                          <div class="custom_deep_block">
+                            <div class="{{ ns }}-price">
+                              <span class="{{ ns }}-now">{{ product.price | money_without_trailing_zeros }}</span>
+                              {% if product.compare_at_price_max > product.price %}
+                                <s class="{{ ns }}-was">{{ product.compare_at_price_max | money_without_trailing_zeros }}</s>
+                                {% assign save = product.compare_at_price_max | minus: product.price %}
+                                {% assign pct = save | times: 100.0 | divided_by: product.compare_at_price_max | round %}
+                                <span class="{{ ns }}-off">(-{{ pct }}%)</span>
+                              {% endif %}
+                            </div>
+                            
+                          </div>
+                        </div>
+                      </a>
+
+                      <form method="post" action="/cart/add" class="{{ ns }}-atc" data-product-id="{{ product.id }}">
+                        <input type="hidden" name="id" value="{{ v.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="{{ ns }}-btn" {% unless product.available %}disabled{% endunless %}>
+                          {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+
+                  {% if show_ad_this_slide and ad_pos == 4 and pos_in_slide == 3 %}
+                    {{ promo_card }}
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                <div class="{{ ns }}-empty">Assign a collection to show products.</div>
+              {% endif %}
+            </div>
+
+            <button class="{{ ns }}-nav {{ ns }}-next" type="button" aria-label="Next" hidden>
+              →
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Mobile-only progress thumb (hidden in Grid mode) -->
+    <div class="nf-progress"></div>
+  </div>
+
+<style>
+  .{{ ns }}-section{padding:36px 0}
+  .{{ ns }}-container{max-width:1300px;margin:0 auto;padding:0}
+  .{{ ns }}-heading{margin:19px 0;font-size:clamp(22px,2.6vw,30px);font-weight:600;line-height:1.15}
+
+  /* Tabs */
+  .{{ ns }}-tabs{display:flex;gap:14px;margin:24px 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .{{ ns }}-tabs::-webkit-scrollbar{display:none}
+  .{{ ns }}-tab{
+    flex:0 0 auto;white-space:nowrap;
+    border:1px solid #0f4264;background:#f6f8fb;color:#0f4264;
+    padding:10px 16px;border-radius:6px;font-weight:500;cursor:pointer;font-size:16px;
+  }
+  .{{ ns }}-tab.is-active{background:#0f4264;color:#fff;border-color:#0f4264}
+
+  .custom_subtitle_value_most{
+    color: {{ section.settings.text_color }};
+    font-size: 14px !important;
+    font-weight:500; 
+    margin: 5px 0 !important;
+  }
+  .custom_deep_block{display:flex;justify-content:space-between;align-items:center}
+
+  /* Panels */
+  .{{ ns }}-panel{display:block}
+  .{{ ns }}-panel:not(.is-active){display:none}
+
+  /* Slider base */
+  .{{ ns }}-item .card__badge .badge{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  :root{--{{ ns }}-gap:24px}
+  .{{ ns }}-slider{position:relative; overflow:visible;} /* make sure arrows aren't clipped */
+  .{{ ns }}-track{display:flex;gap:var(--{{ ns }}-gap);overflow-x:hidden;scroll-behavior:smooth;overscroll-behavior-x:contain}
+
+  /* ===== Desktop (>=990px) : variable columns ===== */
+  @media (min-width: 990px){
+    .{{ ns }}-item, .{{ ns }}-promo{
+      flex:0 0 calc((100% - (var(--{{ ns }}-gap) * (var(--{{ ns }}-cols-desktop, 4) - 1))) / var(--{{ ns }}-cols-desktop, 4));
+    }
+  }
+
+  /* Generic slot baseline */
+.slot { min-height: 0; }
+
+/* Subtitle: up to 2 lines (adjust to your typography) */
+.slot--subtitle {
+  /* line-height ~20px; 2 lines -> 40; plus small margin buffer */
+  min-height: 44px;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* Reviews row: reserve a single line even if the app doesn’t render */
+.slot--reviews { min-height: 22px; }
+
+/* Swatches row: chip = 30px + gaps; give room for one row */
+.slot--swatches { min-height: 58px; }
+
+/* If you want the price row to be rock solid too, wrap it in .slot--price
+   and uncomment this line: */
+/* .product-card-wrapper .slot--price { min-height: 40px; } */
+
+  /* Product card */
+  .{{ ns }}-card{
+    border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-height:582px;
+    position:relative;
+  }
+  .{{ ns }}-link{display:block;color:inherit;text-decoration:none}
+  .{{ ns }}-media{background:#f7f8fa;position:relative;}
+  .{{ ns }}-img{width:100%;height:auto;object-fit:contain;display:block;transition:opacity .28s ease}
+  .{{ ns }}-img--hover{position:absolute; inset:0; opacity:0; pointer-events:none;}
+  .{{ ns }}-card:hover .{{ ns }}-img--hover{ opacity:1; }
+
+  .{{ ns }}-badge{position:absolute;left:14px;top:14px;background:#ff453a;color:#fff;font-weight:600;font-size:12px;padding:4px 8px;border-radius:8px;z-index:2}
+  .{{ ns }}-body{padding:14px 16px;display:flex;flex-direction:column;gap:5px}
+  .{{ ns }}-title{
+    font-size:16px;line-height:1.35;font-weight:500;margin-bottom:6px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#000
+  }
+  .{{ ns }}-price{display:flex;align-items:center;gap:8px}
+  .{{ ns }}-now{font-weight:500;font-size:17px;color:#000}
+  .{{ ns }}-was{color:#98a2b3;font-size:15px}
+  .{{ ns }}-off{color:#ff0000;font-weight:500;font-size:15px}
+  .{{ ns }}-atc{padding:12px 16px;border-top:1px solid #0f4264;margin-top:auto}
+  .{{ ns }}-btn{text-transform:uppercase;width:100%;border-radius:6px;border:0;background:#0f4264;color:#fff;padding:12px 14px;font-weight:500;cursor:pointer;box-shadow:0 1px 0 rgba(16,24,40,.02);font-size:17px}
+  .{{ ns }}-btn[disabled]{opacity:.5;cursor:not-allowed}
+
+  /* Wishlist overlay */
+  .{{ ns }}-wish{position:absolute; right:12px; top:0px; z-index:1; border-radius:999px; display:grid; place-items:center; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease, color .15s ease, background .15s ease;}
+  .h-wishlist-icon svg{ width:18px; height:18px; color:#ff453a; }
+
+  /* Promo card */
+  .{{ ns }}-promo{border-radius:16px;overflow:hidden;background:var(--promo-bg, #eaf4fb);border:1px solid rgba(0,0,0,.06);display:flex;flex-direction:column;justify-content:flex-start;height:max-content}
+  .{{ ns }}-promo-inner{padding:20px 20px 0}
+  .{{ ns }}-promo-title{font-size:clamp(18px,2.2vw,30px);font-weight:600;line-height:1.15;margin:0 0 10px}
+  .{{ ns }}-promo-sub{color:#000;font-size:clamp(15px,2.2vw,17px);opacity:.9;margin:0 0 14px;line-height:1.4}
+  .{{ ns }}-promo-img{width:100%;height:276px;object-fit:contain;mix-blend:multiply}
+  .{{ ns }}-promo-cta{display:block;background:#0f4264;color:#fff;text-align:center;border-radius:6px;margin:14px 16px 16px;padding:8px 16px;font-weight:800;text-decoration:none}
+
+  /* Arrows (desktop only) */
+  .{{ ns }}-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    width:44px;height:44px;border-radius:999px;border:0;background:#0f4264;color:#fff;
+    display:grid;place-items:center;box-shadow:0 12px 24px rgba(0,0,0,.25);cursor:pointer;z-index:10; /* higher so it's never under content */
+    will-change:transform;
+  }
+  .{{ ns }}-prev{left:-8px}
+  .{{ ns }}-next{right:-8px}
+  .{{ ns }}-nav[disabled]{opacity:.45;cursor:not-allowed; visibility:hidden;} /* stay visible at start/end */
+
+  /* ===== Mobile (<=989px) ===== */
+  @media (max-width: 989px){
+    .{{ ns }}-container{max-width:1500px;margin:0 auto;padding:0 14px}
+    .{{ ns }}-card{
+      min-height: auto !important;
+    }
+    .custom_subtitle_value_most{font-size:12px !important}
+    .{{ ns }}-nav{display:none}
+    .h-wishlist-icon svg{ width:12px; height:12px; color:#ff453a; }
+    .jdgm-prev-badge{font-size:12px !important}
+    .{{ ns }}-wish{right: 0 !important}
+    .badge{
+      padding: .5rem !important;
+      font-size: 9px !important;
+    }
+
+    /* Slider mode */
+    .{{ ns }}-section[data-mobile-mode="slider"] .{{ ns }}-track{
+      overflow-x:auto; scroll-snap-type:x mandatory; padding-bottom:8px; gap:var(--{{ ns }}-gap);
+    }
+    .{{ ns }}-section[data-mobile-mode="slider"] .{{ ns }}-item,
+    .{{ ns }}-section[data-mobile-mode="slider"] .{{ ns }}-promo{
+      flex:0 0 calc((100% - var(--{{ ns }}-gap)) / var(--{{ ns }}-cards-per-view, 1.5));
+      max-width:calc((100% - var(--{{ ns }}-gap)) / var(--{{ ns }}-cards-per-view, 1.5));
+      scroll-snap-align:start; scroll-snap-stop:always;
+    }
+
+    /* Always hide native scrollbar on mobile slider (we use nf-progress) */
+    .{{ ns }}-section[data-mobile-mode="slider"] .{{ ns }}-track{
+      scrollbar-width:none !important;
+      -ms-overflow-style:none !important;
+    }
+    .{{ ns }}-section[data-mobile-mode="slider"] .{{ ns }}-track::-webkit-scrollbar{
+      display:none !important; height:0 !important; background:transparent !important;
+    }
+
+    /* Custom progress thumb (shown only when data-mobile-progress="true") */
+    .{{ ns }}-section[data-mobile-mode="slider"] .nf-progress{ display:none; }
+    .{{ ns }}-section[data-mobile-mode="slider"][data-mobile-progress="true"] .nf-progress{
+      display:block; height:4px; width:70px; border-radius:999px; background:#0f4264; margin:10px 0 0; will-change:transform;
+    }
+
+    /* Grid mode */
+    .{{ ns }}-section[data-mobile-mode="grid"] .{{ ns }}-track{ overflow-x:visible; flex-wrap:wrap; }
+    .{{ ns }}-section[data-mobile-mode="grid"] .{{ ns }}-item,
+    .{{ ns }}-section[data-mobile-mode="grid"] .{{ ns }}-promo{
+      flex:0 0 calc((100% - (var(--{{ ns }}-gap) * (var(--{{ ns }}-cols-mobile, 2) - 1))) / var(--{{ ns }}-cols-mobile, 2));
+      max-width:calc((100% - (var(--{{ ns }}-gap) * (var(--{{ ns }}-cols-mobile, 2) - 1))) / var(--{{ ns }}-cols-mobile, 2));
+    }
+    .{{ ns }}-section[data-mobile-mode="grid"] .nf-progress{ display:none !important; }
+    .{{ ns }}-now{font-weight:500;font-size:16px;color:#000}
+    .{{ ns }}-was{color:#98a2b3;font-size:16px}
+    .{{ ns }}-off{display: none}
+  }
+</style>
+
+
+<script>
+(function(){
+  var root = document.querySelector('.{{ ns }}-section');
+  if(!root) return;
+
+  var mobileMode   = root.dataset.mobileMode || 'slider';
+  var showProgress = (root.dataset.mobileProgress === 'true');
+
+  /* ---------- Tabs ---------- */
+  var tabs   = Array.from(root.querySelectorAll('.{{ ns }}-tab'));
+  var panels = Array.from(root.querySelectorAll('.{{ ns }}-panel'));
+
+  function activateTab(idx){
+    tabs.forEach(function(b,i){
+      b.classList.toggle('is-active', i===idx);
+      b.setAttribute('aria-selected', i===idx ? 'true' : 'false');
+    });
+    panels.forEach(function(p,i){
+      if(i===idx){ p.classList.add('is-active'); p.removeAttribute('hidden'); }
+      else{ p.classList.remove('is-active'); p.setAttribute('hidden',''); }
+    });
+    var active = panels[idx];
+    if(active){ active.dispatchEvent(new CustomEvent('panel:activated', {bubbles:true})); }
+  }
+  tabs.forEach(function(b,i){ b.addEventListener('click', function(){ activateTab(i); }); });
+
+  /* ---------- Slider per panel ---------- */
+  function initPanel(panel){
+    var track = panel.querySelector('[data-track]');
+    var prev  = panel.querySelector('.{{ ns }}-prev');
+    var next  = panel.querySelector('.{{ ns }}-next');
+    if(!track || !prev || !next) return;
+
+    function isDesktop(){ return window.matchMedia('(min-width: 990px)').matches; }
+
+    function getStep(){
+      var card = track.querySelector(':scope > *');
+      if(!card) return 0;
+      var r  = card.getBoundingClientRect();
+      var cs = getComputedStyle(track);
+      var gap = parseFloat(cs.columnGap || cs.gap || 0);
+      return Math.round(r.width + (isNaN(gap)?0:gap));
+    }
+
+    function updateArrows(){
+      var hasOverflow = track.scrollWidth > (track.clientWidth + 2);
+      var show = isDesktop() && hasOverflow;
+
+      // Show both arrows when overflow exists on desktop; toggle disabled based on position.
+      prev.hidden = next.hidden = !show;
+      if(!show) return;
+
+      var max = Math.max(0, track.scrollWidth - track.clientWidth - 1);
+      var atStart = track.scrollLeft <= 1;
+      var atEnd   = track.scrollLeft >= max;
+
+      prev.disabled = atStart;
+      next.disabled = atEnd;
+    }
+
+    function scrollDir(dir){
+      var step = getStep();
+      if(step <= 0) return;
+      track.scrollTo({ left: track.scrollLeft + dir*step, behavior: 'smooth' });
+      // Re-evaluate after the smooth scroll finishes-ish
+      setTimeout(updateArrows, 320);
+    }
+
+    // Bind events
+    next.addEventListener('click', function(){ scrollDir(+1); });
+    prev.addEventListener('click', function(){ scrollDir(-1); });
+    track.addEventListener('scroll', function(){ if(isDesktop()) updateArrows(); }, {passive:true});
+    panel.addEventListener('panel:activated', updateArrows);
+    window.addEventListener('resize', updateArrows, {passive:true});
+
+    // Recompute when images load (common cause of late overflow)
+    track.querySelectorAll('img').forEach(function(img){
+      if(!img.complete){
+        img.addEventListener('load', function(){ requestAnimationFrame(updateArrows); }, { once:true });
+      }
+    });
+
+    // Recompute when the track size/content changes
+    if('ResizeObserver' in window){
+      var ro = new ResizeObserver(function(){ updateArrows(); });
+      ro.observe(track);
+    }else{
+      // Fallback: simple mutation observer on children changes
+      if('MutationObserver' in window){
+        var mo = new MutationObserver(function(){ updateArrows(); });
+        mo.observe(track, { childList:true, subtree:true });
+      }
+    }
+
+    // Initial pass (a couple of frames to let layout settle)
+    requestAnimationFrame(function(){
+      updateArrows();
+      setTimeout(updateArrows, 200);
+    });
+  }
+
+  /* ---------- Mobile progress thumb (only in slider mode and when enabled) ---------- */
+  function initProgress(panel){
+    if(mobileMode !== 'slider' || !showProgress) return;
+
+    var thumb = root.querySelector('.nf-progress');
+    var track = panel.querySelector('[data-track]');
+    if(!thumb || !track) return;
+
+    function isMobile(){ return window.innerWidth <= 989; }
+
+    function moveThumb(){
+      if(!isMobile()){
+        thumb.style.transform = 'translateX(0)';
+        return;
+      }
+      var barWidth  = thumb.offsetWidth || 70;
+      var viewW     = track.clientWidth;
+      var contentW  = track.scrollWidth;
+      var maxScroll = Math.max(1, contentW - viewW);
+      var ratio     = Math.min(1, Math.max(0, track.scrollLeft / maxScroll));
+      var travel    = Math.max(0, viewW - barWidth);
+      var x         = ratio * travel;
+      thumb.style.transform = 'translateX(' + x + 'px)';
+    }
+
+    if(!track.dataset.progressBound){
+      track.addEventListener('scroll', moveThumb, { passive: true });
+      window.addEventListener('resize', function(){ requestAnimationFrame(moveThumb); }, { passive: true });
+      track.querySelectorAll('img').forEach(function(img){
+        if(!img.complete){
+          img.addEventListener('load', function(){ requestAnimationFrame(moveThumb); }, { once:true });
+        }
+      });
+      if('ResizeObserver' in window){
+        var ro2 = new ResizeObserver(function(){ moveThumb(); });
+        ro2.observe(track);
+      }
+      track.dataset.progressBound = '1';
+    }
+
+    panel.addEventListener('panel:activated', function(){
+      requestAnimationFrame(moveThumb);
+    });
+
+    requestAnimationFrame(moveThumb);
+  }
+
+  /* ---------- Init all panels ---------- */
+  panels.forEach(function(p){
+    initPanel(p);
+    initProgress(p);
+  });
+
+  // Kick initial panel
+  var firstPanel = panels[0];
+  if(firstPanel){
+    firstPanel.dispatchEvent(new CustomEvent('panel:activated', {bubbles:true}));
+  }
+
+  /* ---------- AJAX Add to Cart ---------- */
+  panels.forEach(function(panel){
+    panel.addEventListener('submit', function(e){
+      var form = e.target.closest('.{{ ns }}-atc');
+      if(!form) return;
+      e.preventDefault();
+
+      var fd = new FormData(form);
+      if(!fd.get('quantity')) fd.set('quantity','1');
+
+      fetch('/cart/add.js', {
+        method:'POST',
+        body: fd,
+        headers: { 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+        credentials: 'same-origin'
+      })
+      .then(function(r){ if(!r.ok) return r.json().then(function(j){ throw j; }); return r.json(); })
+      .then(function(){ return refreshCartSections(); })
+      .then(function(){ openDrawerAndBind(); })
+      .catch(function(){ window.location.href = '/cart'; });
+    });
+  });
+
+  function refreshCartSections(){
+    var sections = ['cart-drawer','cart-icon-bubble'];
+    var url = (window.Shopify && Shopify.routes ? Shopify.routes.root : '/') + '?sections=' + sections.join(',');
+    return fetch(url)
+      .then(function(r){ return r.json(); })
+      .then(function(html){
+        var parser = new DOMParser();
+
+        if(html['cart-icon-bubble']){
+          var d1 = parser.parseFromString(html['cart-icon-bubble'],'text/html');
+          var newIcon = d1.querySelector('#cart-icon-bubble');
+          var curIcon = document.querySelector('#cart-icon-bubble');
+          if(newIcon && curIcon) curIcon.replaceWith(newIcon);
+        }
+        if(html['cart-drawer']){
+          var d2 = parser.parseFromString(html['cart-drawer'],'text/html');
+          var newDrawer = d2.querySelector('cart-drawer');
+          var curDrawer = document.querySelector('cart-drawer');
+          if(newDrawer && curDrawer) curDrawer.replaceWith(newDrawer);
+          else if(newDrawer && !curDrawer) document.body.appendChild(newDrawer);
+        }
+      });
+  }
+
+  function openDrawerAndBind(){
+    var drawer = document.querySelector('cart-drawer');
+    if(drawer && typeof drawer.open === 'function'){ drawer.open(); }
+    else{
+      drawer?.setAttribute('open','');
+      var toggle = document.querySelector('[data-cart-toggle],[data-drawer-toggle="#CartDrawer"],.header__icon--cart,#cart-icon-bubble a');
+      toggle && toggle.click();
+    }
+    bindDrawerHandlers();
+  }
+
+  function bindDrawerHandlers(){
+    var drawer = document.querySelector('cart-drawer');
+    if(!drawer) return;
+
+    drawer.addEventListener('click', function(e){
+      var rm = e.target.closest('cart-remove-button');
+      if(rm && rm.dataset.index){
+        e.preventDefault();
+        changeLine(parseInt(rm.dataset.index,10), 0);
+      }
+    });
+
+    drawer.addEventListener('change', function(e){
+      var input = e.target.closest('.quantity__input');
+      if(input && input.dataset.index){
+        var qty = parseInt(input.value,10); if(isNaN(qty)) qty = 0;
+        changeLine(parseInt(input.dataset.index,10), qty);
+      }
+    });
+  }
+
+  function changeLine(line, qty){
+    fetch('/cart/change.js', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body: JSON.stringify({ line: line, quantity: qty })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ return refreshCartSections(); })
+    .then(function(){ openDrawerAndBind(); })
+    .catch(function(){ window.location.reload(); });
+  }
+})();
+</script>
+
+
+</section>
+
+{% schema %}
+{
+  "name": "Most Sold",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Most Sold This Week" },
+
+    { "type": "header", "content": "Layout" },
+    {
+      "type": "range",
+      "id": "desktop_cols",
+      "label": "Desktop cards per row",
+      "min": 2, "max": 6, "step": 1,
+      "default": 4
+    },
+    { "type": "color", "id": "text_color", "label": "subtitle color", "default": "#000" },
+    {
+      "type": "select",
+      "id": "mobile_mode",
+      "label": "Mobile layout",
+      "default": "slider",
+      "options": [
+        { "value": "slider", "label": "Slider (horizontal scroll)" },
+        { "value": "grid",   "label": "Grid" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "mobile_cols",
+      "label": "Mobile grid columns",
+      "min": 1, "max": 3, "step": 1,
+      "default": 2,
+      "info": "Used only when Mobile layout is Grid"
+    },
+    {
+      "type": "select",
+      "id": "mobile_slider_cards_per_view",
+      "label": "Mobile slider: cards visible",
+      "default": "1.5",
+      "options": [
+        { "value": "1",   "label": "1" },
+        { "value": "1.25","label": "1.25" },
+        { "value": "1.5", "label": "1.5" },
+        { "value": "1.75","label": "1.75" },
+        { "value": "2",   "label": "2" }
+      ],
+      "info": "Used only when Mobile layout is Slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "mobile_slider_show_scrollbar",
+      "label": "Show progress thumb on mobile slider",
+      "default": true
+    },
+
+    { "type": "header", "content": "Badge settings" },
+    { "type": "text", "id": "badge_tags", "label": "Show badge when product tag matches (comma-separated)", "default": "sale,offer" }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "Collection" },
+        { "type": "text", "id": "title", "label": "Tab title (optional)" },
+        { "type": "range", "id": "limit", "label": "Max products", "min": 4, "max": 48, "step": 1, "default": 20 },
+
+        { "type": "header", "content": "Promo card" },
+        { "type": "checkbox", "id": "promo_enable", "label": "Enable promo card", "default": true },
+        { "type": "text", "id": "promo_title", "label": "Promo title", "default": "20% Off Select Products" },
+        { "type": "textarea", "id": "promo_sub", "label": "Promo subtitle", "default": "Save 20% when you buy $120 of select items." },
+        { "type": "image_picker", "id": "promo_image", "label": "Promo image" },
+        { "type": "text", "id": "promo_cta_label", "label": "Promo CTA label", "default": "Explore" },
+        { "type": "url", "id": "promo_cta_url", "label": "Promo CTA URL" },
+        { "type": "color", "id": "promo_bg", "label": "Promo background", "default": "#EAF4FB" },
+
+        { "type": "header", "content": "Promo placement" },
+        { "type": "text", "id": "ad_slides", "label": "Show on slides (comma-separated)", "default": "1,3,5" },
+        { "type": "range", "id": "ad_position", "label": "Position in slide (1–4)", "min": 1, "max": 4, "step": 1, "default": 3 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Most Sold (Tabs + Promo)",
+      "blocks": [
+        { "type": "tab" },
+        { "type": "tab" },
+        { "type": "tab" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,1087 @@
+{% comment %}
+  Renders a product media gallery. Should be used with 'media-gallery.js'
+  Also see 'product-media-modal'
+
+  Accepts:
+  - product: {Object} Product liquid object
+  - variant_images: {Array} Product images associated with a variant
+  - limit: {Number} (optional) When passed, limits the number of media items to render
+
+  Usage:
+  {% render 'product-media-gallery' %}
+{% endcomment %}
+
+{%- liquid
+  if section.settings.hide_variants and variant_images.size == product.media.size
+    assign single_media_visible = true
+  endif
+
+  if limit == 1
+    assign single_media_visible = true
+  endif
+
+  assign media_count = product.media.size
+  if section.settings.hide_variants and media_count > 1 and variant_images.size > 0
+    assign media_count = media_count | minus: variant_images.size | plus: 1
+  endif
+
+  if media_count == 1 or single_media_visible
+    assign single_media_visible_mobile = true
+  endif
+
+  if media_count == 0 or single_media_visible_mobile or section.settings.mobile_thumbnails == 'show' or section.settings.mobile_thumbnails == 'columns' and media_count < 3
+    assign hide_mobile_slider = true
+  endif
+
+  if section.settings.media_size == 'large'
+    assign media_width = 0.65
+  elsif section.settings.media_size == 'medium'
+    assign media_width = 0.55
+  elsif section.settings.media_size == 'small'
+    assign media_width = 0.45
+  endif
+-%}
+
+{%- liquid
+  assign color_index = 0
+  for opt in product.options_with_values
+    assign name_down = opt.name | downcase
+    if name_down contains 'color' or name_down contains 'colour'
+      assign color_index = forloop.index
+    endif
+  endfor
+-%}
+
+<media-gallery
+  id="MediaGallery-{{ section.id }}"
+  role="region"
+  {% if section.settings.enable_sticky_info %}
+    class="product__column-sticky"
+  {% endif %}
+  aria-label="{{ 'products.product.media.gallery_viewer' | t }}"
+  data-desktop-layout="{{ section.settings.gallery_layout }}"
+  data-color-index="{{ color_index }}"
+>
+  
+  {%- if first_3d_model -%}
+    <button
+      class="button button--full-width product__xr-button"
+      type="button"
+      aria-label="{{ 'products.product.xr_button_label' | t }}"
+      data-shopify-xr
+      data-shopify-model3d-id="{{ first_3d_model.id }}"
+      data-shopify-title="{{ product.title | escape }}"
+      data-shopify-xr-hidden
+    >
+      <span class="svg-wrapper">
+        {{- 'icon-3d-model.svg' | inline_asset_content -}}
+      </span>
+      {{ 'products.product.xr_button' | t }}
+    </button>
+  {%- endif -%}
+  {%- liquid
+    assign is_not_limited_to_single_item = false
+    if limit == null or limit > 1
+      assign is_not_limited_to_single_item = true
+    endif
+  -%}
+  {%- if is_not_limited_to_single_item
+    and media_count > 1
+    and section.settings.gallery_layout contains 'thumbnail'
+    or section.settings.mobile_thumbnails == 'show'
+  -%}
+    <slider-component
+      id="GalleryThumbnails-{{ section.id }}"
+      class="thumbnail-slider slider-mobile-gutter quick-add-hidden{% unless section.settings.gallery_layout contains 'thumbnail' %} medium-hide large-up-hide{% endunless %}{% if section.settings.mobile_thumbnails != 'show' %} small-hide{% endif %}{% if media_count <= 3 %} thumbnail-slider--no-slide{% endif %}"
+    >
+      <button
+        type="button"
+        class="slider-button slider-button--prev{% if media_count <= 3 %} small-hide{% endif %}{% if media_count <= 4 %} medium-hide large-up-hide{% endif %}"
+        name="previous"
+        aria-label="{{ 'general.slider.previous_slide' | t }}"
+        aria-controls="GalleryThumbnails-{{ section.id }}"
+        data-step="3"
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </button>
+      <ul
+        id="Slider-Thumbnails-{{ section.id }}"
+        class="thumbnail-list list-unstyled slider slider--mobile{% if section.settings.gallery_layout == 'thumbnail_slider' %} slider--tablet-up{% endif %}"
+      >
+        {%- capture sizes -%}
+          (min-width: {{ settings.page_width }}px) calc(({{ settings.page_width | minus: 100 | times: media_width | round }} - 4rem) / 4),
+          (min-width: 990px) calc(({{ media_width | times: 100 }}vw - 4rem) / 4),
+          (min-width: 750px) calc((100vw - 15rem) / 8),
+          calc((100vw - 8rem) / 3)
+        {%- endcapture -%}
+
+        {%- if featured_media != null -%}
+          {%- liquid
+            capture media_index
+              if featured_media.media_type == 'model'
+                increment model_index
+              elsif featured_media.media_type == 'video' or featured_media.media_type == 'external_video'
+                increment video_index
+              elsif featured_media.media_type == 'image'
+                increment image_index
+              endif
+            endcapture
+            assign media_index = media_index | plus: 1
+          -%}
+          {%- liquid
+            assign linked_variant_ids = ''
+            assign linked_colors = ''
+            if color_index == null or color_index == '' 
+              assign color_index = 0
+            endif
+            for v in product.variants
+              if v.featured_media and v.featured_media.id == featured_media.id
+                assign linked_variant_ids = linked_variant_ids | append: v.id | append: ','
+                if color_index > 0
+                  case color_index
+                    when 1
+                      assign vc = v.option1
+                    when 2
+                      assign vc = v.option2
+                    when 3
+                      assign vc = v.option3
+                  endcase
+                  if vc
+                    assign vc_low = vc | downcase
+                    assign vc_token = vc_low | append: '|'
+                    unless linked_colors contains vc_token
+                      assign linked_colors = linked_colors | append: vc_token
+                    endunless
+                  endif
+                endif
+              endif
+            endfor
+          -%}
+          <li
+            id="Slide-Thumbnails-{{ section.id }}-0"
+            class="thumbnail-list__item slider__slide{% if section.settings.hide_variants and variant_images contains featured_media.src %} thumbnail-list_item--variant{% endif %}"
+            data-target="{{ section.id }}-{{ featured_media.id }}"
+            data-media-position="{{ media_index }}"
+            data-variant-ids="{{ linked_variant_ids | strip }}"
+            data-colors="{{ linked_colors | strip }}"
+          >
+
+            {%- capture thumbnail_id -%}
+              Thumbnail-{{ section.id }}-0
+            {%- endcapture -%}
+            <button
+              class="thumbnail global-media-settings global-media-settings--no-shadow"
+              aria-label="{%- if featured_media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif featured_media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif featured_media.media_type == 'video' or featured_media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
+              aria-current="true"
+              aria-controls="GalleryViewer-{{ section.id }}"
+              aria-describedby="{{ thumbnail_id }}"
+            >
+              {{
+                featured_media.preview_image
+                | image_url: width: 416
+                | image_tag:
+                  loading: 'lazy',
+                  sizes: sizes,
+                  widths: '54, 74, 104, 162, 208, 324, 416',
+                  id: thumbnail_id,
+                  alt: featured_media.alt
+                | escape
+              }}
+            </button>
+          </li>
+        {%- endif -%}
+        {%- for media in product.media -%}
+          {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
+            {%- liquid
+              capture media_index
+                if media.media_type == 'model'
+                  increment model_index
+                elsif media.media_type == 'video' or media.media_type == 'external_video'
+                  increment video_index
+                elsif media.media_type == 'image'
+                  increment image_index
+                endif
+              endcapture
+              assign media_index = media_index | plus: 1
+            -%}
+            {%- liquid
+              assign linked_variant_ids = ''
+              assign linked_colors = ''
+              if color_index == null or color_index == '' 
+                assign color_index = 0
+              endif
+              for v in product.variants
+                if v.featured_media and v.featured_media.id == media.id
+                  assign linked_variant_ids = linked_variant_ids | append: v.id | append: ','
+                  if color_index > 0
+                    case color_index
+                      when 1
+                        assign vc = v.option1
+                      when 2
+                        assign vc = v.option2
+                      when 3
+                        assign vc = v.option3
+                    endcase
+                    if vc
+                      assign vc_low = vc | downcase
+                      assign vc_token = vc_low | append: '|'
+                      unless linked_colors contains vc_token
+                        assign linked_colors = linked_colors | append: vc_token
+                      endunless
+                    endif
+                  endif
+                endif
+              endfor
+            -%}
+            <li
+              id="Slide-Thumbnails-{{ section.id }}-{{ forloop.index }}"
+              class="thumbnail-list__item slider__slide{% if section.settings.hide_variants and variant_images contains media.src %} thumbnail-list_item--variant{% endif %}"
+              data-target="{{ section.id }}-{{ media.id }}"
+              data-media-position="{{ media_index }}"
+              data-variant-ids="{{ linked_variant_ids | strip }}"
+              data-colors="{{ linked_colors | strip }}"
+            >
+
+              {%- if media.media_type == 'model' -%}
+                <span class="thumbnail__badge" aria-hidden="true">
+                  <span class="svg-wrapper">
+                    {{- 'icon-3d-model.svg' | inline_asset_content -}}
+                  </span>
+                </span>
+              {%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}
+                <span class="thumbnail__badge" aria-hidden="true">
+                  <span class="svg-wrapper">
+                    {{- 'icon-play.svg' | inline_asset_content -}}
+                  </span>
+                </span>
+              {%- endif -%}
+              {%- capture thumbnail_id -%}
+                Thumbnail-{{ section.id }}-{{ forloop.index }}
+              {%- endcapture -%}
+              <button
+                class="thumbnail global-media-settings global-media-settings--no-shadow"
+                aria-label="{%- if media.media_type == 'image' -%}{{ 'products.product.media.load_image' | t: index: media_index }}{%- elsif media.media_type == 'model' -%}{{ 'products.product.media.load_model' | t: index: media_index }}{%- elsif media.media_type == 'video' or media.media_type == 'external_video' -%}{{ 'products.product.media.load_video' | t: index: media_index }}{%- endif -%}"
+                {% if media == product.selected_or_first_available_variant.featured_media
+                  or product.selected_or_first_available_variant.featured_media == null
+                  and forloop.index == 1
+                %}
+                  aria-current="true"
+                {% endif %}
+                aria-controls="GalleryViewer-{{ section.id }}"
+                aria-describedby="{{ thumbnail_id }}"
+              >
+                {{
+                  media.preview_image
+                  | image_url: width: 416
+                  | image_tag:
+                    loading: 'lazy',
+                    sizes: sizes,
+                    widths: '54, 74, 104, 162, 208, 324, 416',
+                    id: thumbnail_id,
+                    alt: media.alt
+                  | escape
+                }}
+              </button>
+            </li>
+          {%- endunless -%}
+        {%- endfor -%}
+      </ul>
+      <button
+        type="button"
+        class="slider-button slider-button--next{% if media_count <= 3 %} small-hide{% endif %}{% if media_count <= 4 %} medium-hide large-up-hide{% endif %}"
+        name="next"
+        aria-label="{{ 'general.slider.next_slide' | t }}"
+        aria-controls="GalleryThumbnails-{{ section.id }}"
+        data-step="3"
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </button>
+    </slider-component>
+    <slider-component id="GalleryViewer-{{ section.id }}" class="slider-mobile-gutter">
+    <a class="skip-to-content-link button visually-hidden quick-add-hidden" href="#ProductInfo-{{ section.id }}">
+      {{ 'accessibility.skip_to_product_info' | t }}
+    </a>
+    <ul
+      id="Slider-Gallery-{{ section.id }}"
+      class="product__media-list contains-media grid grid--peek list-unstyled slider slider--mobile"
+      role="list"
+    >
+      {%- if product.selected_or_first_available_variant.featured_media != null -%}
+        {%- assign featured_media = product.selected_or_first_available_variant.featured_media -%}
+        <li
+          id="Slide-{{ section.id }}-{{ featured_media.id }}"
+          class="product__media-item grid__item slider__slide is-active{% if single_media_visible %} product__media-item--single{% endif %}{% if featured_media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+          data-media-id="{{ section.id }}-{{ featured_media.id }}"
+        >
+          {%- assign media_position = 1 -%}
+          {% render 'product-thumbnail',
+            media: featured_media,
+            media_count: media_count,
+            position: media_position,
+            desktop_layout: section.settings.gallery_layout,
+            mobile_layout: section.settings.mobile_thumbnails,
+            loop: section.settings.enable_video_looping,
+            modal_id: section.id,
+            xr_button: true,
+            media_width: media_width,
+            media_fit: section.settings.media_fit,
+            constrain_to_viewport: section.settings.constrain_to_viewport,
+            lazy_load: false
+          %}
+        </li>
+      {%- endif -%}
+      {%- for media in product.media -%}
+        {% if media_position >= limit
+          or media_position >= 1
+          and section.settings.hide_variants
+          and variant_images contains media.src
+        %}
+          {% continue %}
+        {% endif %}
+
+        {%- unless media.id == product.selected_or_first_available_variant.featured_media.id -%}
+          <li
+            id="Slide-{{ section.id }}-{{ media.id }}"
+            class="product__media-item grid__item slider__slide{% if single_media_visible %} product__media-item--single{% endif %}{% if product.selected_or_first_available_variant.featured_media == nil and forloop.index == 1 %} is-active{% endif %}{% if media.media_type != 'image' %} product__media-item--full{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+            data-media-id="{{ section.id }}-{{ media.id }}"
+          >
+            {%- liquid
+              assign media_position = media_position | default: 0 | plus: 1
+              assign lazy_load = false
+              if media_position > 1
+                assign lazy_load = true
+              endif
+            -%}
+            {% render 'product-thumbnail',
+              media: media,
+              media_count: media_count,
+              position: media_position,
+              desktop_layout: section.settings.gallery_layout,
+              mobile_layout: section.settings.mobile_thumbnails,
+              loop: section.settings.enable_video_looping,
+              modal_id: section.id,
+              xr_button: true,
+              media_width: media_width,
+              media_fit: section.settings.media_fit,
+              constrain_to_viewport: section.settings.constrain_to_viewport,
+              lazy_load: lazy_load
+            %}
+          </li>
+        {%- endunless -%}
+      {%- endfor -%}
+    </ul>
+    <div class="slider-buttons quick-add-hidden{% if hide_mobile_slider %} small-hide{% endif %}">
+      <button
+        type="button"
+        class="slider-button slider-button--prev"
+        name="previous"
+        aria-label="{{ 'general.slider.previous_slide' | t }}"
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </button>
+      <div class="slider-counter caption">
+        <span class="slider-counter--current">1</span>
+        <span aria-hidden="true"> / </span>
+        <span class="visually-hidden">{{ 'general.slider.of' | t }}</span>
+        <span class="slider-counter--total">{{ media_count }}</span>
+      </div>
+      <button
+        type="button"
+        class="slider-button slider-button--next"
+        name="next"
+        aria-label="{{ 'general.slider.next_slide' | t }}"
+      >
+        <span class="svg-wrapper">
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </span>
+      </button>
+    </div>
+  </slider-component>
+  {%- endif -%}
+</media-gallery>
+<style>
+/* ========== DESKTOP: thumbs-left, viewer-right ========== */
+@media (min-width: 990px) {
+  /* 2-column layout */
+  #MediaGallery-{{ section.id }}{
+    display:grid; grid-template-columns:140px 1fr; gap:18px; align-items:start;
+  }
+
+  /* Force the thumbnails column to be visible even if Dawn added hide classes */
+  #GalleryThumbnails-{{ section.id }}{
+    grid-column:1/2;
+    display:block !important;
+    max-height: 640px;                 /* ~5–6 thumbs */
+    overflow-y: auto; overflow-x: hidden;
+    padding-right: 6px;
+    scrollbar-width: thin;
+  }
+
+  /* KILL Dawn slider behaviors on the UL completely */
+  #GalleryThumbnails-{{ section.id }} .thumbnail-list {
+    display:flex !important;
+    flex-direction: column !important;
+    gap:12px !important;
+    transform: none !important;
+    translate: none !important;
+    white-space: normal !important;
+    grid-auto-flow: row !important;
+  }
+  /* Some Dawn builds put these on the UL too */
+  #GalleryThumbnails-{{ section.id }} .thumbnail-list.slider,
+  #GalleryThumbnails-{{ section.id }} .thumbnail-list.slider--tablet-up {
+    display:flex !important;
+    flex-direction:column !important;
+  }
+
+  /* Remove width constraints Dawn gives to slider items */
+  #GalleryThumbnails-{{ section.id }} .thumbnail-list__item{
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    transform: none !important;
+  }
+
+  /* Make each thumbnail a clean square */
+  #GalleryThumbnails-{{ section.id }} .thumbnail{
+    box-sizing:border-box;
+    width:120px; height:120px;
+    border-radius:10px;
+    border:2px solid transparent;
+    background:#fff;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; cursor:pointer; padding:0;
+  }
+  #GalleryThumbnails-{{ section.id }} .thumbnail img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+
+  /* Active thumb highlight */
+  #GalleryThumbnails-{{ section.id }} .thumbnail[aria-current="true"]{
+    border-color:#0f4264 !important;
+  }
+
+  /* Hide Dawn’s tiny arrows for the thumbnail rail */
+  #GalleryThumbnails-{{ section.id }} .slider-button{ display:none !important; }
+
+  /* Viewer column */
+  #GalleryViewer-{{ section.id }}{ grid-column:2/3; position:relative; }
+  #GalleryViewer-{{ section.id }} .slider-buttons,
+  #GalleryViewer-{{ section.id }} .slider-counter{ display:none !important; }
+}
+
+/* Dim non-relevant thumbs when a variant is selected */
+#GalleryThumbnails-{{ section.id }} .thumb-dim { opacity: .35; }
+#GalleryThumbnails-{{ section.id }} .thumb-dim .thumbnail { border-color: transparent !important; }
+
+/* ========== MOBILE: hide vertical thumbs ========== */
+@media (max-width: 989px){
+
+  /* stack the two sliders and reorder: viewer (1) then thumbs (2) */
+  #MediaGallery-{{ section.id }}{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  #GalleryViewer-{{ section.id }}{ order: 1; }
+  #GalleryThumbnails-{{ section.id }}{
+    order: 2;
+    display: block !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* thumbnails rail (UL) – tight, horizontal, no transforms */
+  #Slider-Thumbnails-{{ section.id }}{
+    /* layout */
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    gap: 10px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+
+    /* spacing + sizing vars */
+    --thumb-gap: 10px;
+    --thumb-per: 4;                 /* default → 4 per view */
+    padding: 0 8px 8px;
+    margin: 0;
+
+    /* reset any Dawn transforms */
+    transform: none !important;
+    translate: none !important;
+    white-space: normal !important;
+  }
+
+
+  /* each thumbnail item is a fixed chip, not full-width */
+  #Slider-Thumbnails-{{ section.id }} > .slider__slide,
+  #GalleryThumbnails-{{ section.id }} .thumbnail-list__item{
+    flex: 0 0 calc((100% - (var(--thumb-per) - 1) * var(--thumb-gap)) / var(--thumb-per)) !important;
+    width: calc((100% - (var(--thumb-per) - 1) * var(--thumb-gap)) / var(--thumb-per)) !important;
+    min-width: 0 !important;
+    scroll-snap-align: start;
+    transform: none !important;
+  }
+
+  /* square thumbs */
+  #GalleryThumbnails-{{ section.id }} .thumbnail{
+    width: 100%;
+    aspect-ratio: 1 / 1;            /* perfect square */
+    border-radius: 12px;
+    border: 2px solid rgba(0,0,0,.12);
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* image fills the square neatly */
+  #GalleryThumbnails-{{ section.id }} .thumbnail img{
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  /* active thumb highlight */
+  #GalleryThumbnails-{{ section.id }} .thumbnail[aria-current="true"]{
+    border-color: #186599 !important;
+  }
+
+  /* hide Dawn’s tiny arrows in the thumb component */
+  #GalleryThumbnails-{{ section.id }} .slider-button{ display: none !important; }
+
+  /* (optional) keep your main-image arrows visible on mobile */
+  #GalleryViewer-{{ section.id }} .mdp-arrow{ display: flex; }
+}
+
+@media (max-width: 360px){
+  #Slider-Thumbnails-{{ section.id }}{ --thumb-per: 3; }
+}
+
+/* ========== Round arrows with TRIANGLES (not chevrons) ========== */
+#GalleryViewer-{{ section.id }} .mdp-arrow{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:44px; height:44px; border-radius:50%;
+  background: #0f4264; border:none; cursor:pointer; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+}
+#GalleryViewer-{{ section.id }} .mdp-arrow--prev{ left:14px; }
+#GalleryViewer-{{ section.id }} .mdp-arrow--next{ right:14px; }
+#GalleryViewer-{{ section.id }} .mdp-arrow svg{ width:22px; height:22px; display:block; }
+
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  /* ====== DOM refs ====== */
+  const viewer     = document.getElementById('GalleryViewer-{{ section.id }}');
+  const thumbsEl   = document.getElementById('GalleryThumbnails-{{ section.id }}');
+  const track      = viewer && viewer.querySelector('#Slider-Gallery-{{ section.id }}'); // main media list
+  const thumbsUl   = document.getElementById('Slider-Thumbnails-{{ section.id }}');     // thumbnails <ul>
+  const galleryRoot= document.getElementById('MediaGallery-{{ section.id }}');
+  if (!viewer || !track || !thumbsEl || !thumbsUl || !galleryRoot) return;
+
+  /* ====== NEW: prevent auto-scroll on first paint ====== */
+  let allowScrollIntoView = false; // <-- CHANGED (added)
+
+  /* ====== Helpers ====== */
+  const isMobile = () => window.matchMedia('(max-width: 989px)').matches;
+
+  // colorIndex comes from the media-gallery (preferred) or product-info (fallback)
+  const colorIndex = parseInt(
+    galleryRoot.dataset?.colorIndex ||
+    document.querySelector('product-info')?.dataset?.colorIndex ||
+    '0',
+    10
+  );
+
+  // Build slide index map for viewer
+  const slides = Array.from(track.querySelectorAll('.slider__slide'));
+  const idToIndex = {};
+  slides.forEach((li, i) => {
+    const id = li.getAttribute('data-media-id'); // "{{ section.id }}-{{ media.id }}"
+    if (id) idToIndex[id] = i;
+  });
+  const getActiveIndex = () => {
+    const i = slides.findIndex(s => s.classList.contains('is-active'));
+    return i >= 0 ? i : 0;
+  };
+
+  /* =========================================================
+     🚀 SPEED UPS: eager load + fetchPriority + pre-decode
+  ==========================================================*/
+  function promoteImage(img, priority = 'high'){
+    if (!img) return;
+    try {
+      img.loading = 'eager';
+      img.decoding = 'async';
+      if ('fetchPriority' in img) img.fetchPriority = priority;
+      if (typeof img.decode === 'function') img.decode().catch(() => {});
+    } catch(e){}
+  }
+
+  function preloadImageOf(img){
+    if (!img) return;
+    const href = img.currentSrc || img.src;
+    if (!href) return;
+    const key = 'preload-' + href;
+    if (document.querySelector(`link[data-preload-key="${CSS.escape(key)}"]`)) return;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = href;
+    link.crossOrigin = img.crossOrigin || '';
+    link.dataset.preloadKey = key;
+    document.head.appendChild(link);
+  }
+
+  function getSlideImg(slide){
+    return slide?.querySelector('img');
+  }
+
+  (function warmInitial(){
+    for (let i = 0; i < Math.min(3, slides.length); i++){
+      const img = getSlideImg(slides[i]);
+      promoteImage(img, i === 0 ? 'high' : 'low');
+      preloadImageOf(img);
+    }
+  })();
+
+  function warmNeighbors(idx){
+    const neighbors = [idx - 1, idx + 1].filter(i => i >= 0 && i < slides.length);
+    neighbors.forEach(i => {
+      const img = getSlideImg(slides[i]);
+      promoteImage(img, 'low');
+      preloadImageOf(img);
+    });
+  }
+
+  /* =========================================================
+     VISIBLE-NAV HELPERS (avoid landing on hidden slides)
+  ==========================================================*/
+  function isSlideVisible(s){ return s.style.display !== 'none'; }
+
+  function getVisibleIndices(){
+    return slides.map((s,i)=>({s,i})).filter(o => isSlideVisible(o.s)).map(o => o.i);
+  }
+
+  function getActiveVisibleIndex(){
+    const vis = getVisibleIndices();
+    const activeAbs = slides.findIndex(s => s.classList.contains('is-active'));
+    const pos = vis.indexOf(activeAbs);
+    return pos >= 0 ? pos : 0;
+  }
+
+  /* ====== GoTo with warm-up + visible guard ====== */
+  function goTo(i){
+    i = Math.max(0, Math.min(i, slides.length - 1));
+
+    // If target is hidden, redirect to nearest visible (next >= i, else first)
+    if (!isSlideVisible(slides[i])){
+      const vis = getVisibleIndices();
+      if (!vis.length) return;
+      const next = vis.find(idx => idx >= i) ?? vis[0];
+      i = next;
+    }
+
+    const target = slides[i];
+    if (!target) return;
+
+    // Warm the target image BEFORE reveal
+    const targetImg = getSlideImg(target);
+    promoteImage(targetImg, 'high');
+    preloadImageOf(targetImg);
+    warmNeighbors(i);
+
+    // Switch active class
+    slides.forEach(s => s.classList.remove('is-active'));
+    target.classList.add('is-active');
+
+    // ===== IMPORTANT CHANGE =====
+    // Only try to scroll things into view IF the user has interacted.
+    if (allowScrollIntoView) {
+      // Scroll main track (could otherwise scroll the whole page on load)
+      target.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    }
+
+    // Highlight thumb + (conditionally) keep thumb in view
+    if (thumbsEl){
+      thumbsEl.querySelectorAll('.thumbnail[aria-current="true"]').forEach(t => t.removeAttribute('aria-current'));
+      const mediaId = target.getAttribute('data-media-id');
+      const thumbBtn = thumbsEl.querySelector(`[data-target="${mediaId}"] .thumbnail`);
+      if (thumbBtn){
+        thumbBtn.setAttribute('aria-current','true');
+
+        if (allowScrollIntoView) {
+          const thumbItem = thumbBtn.closest('.thumbnail-list__item');
+          thumbItem?.scrollIntoView({ block:'nearest', inline:'nearest' });
+        }
+      }
+    }
+  }
+
+  /* ====== Main viewer ARROWS (navigate among visible slides) ====== */
+  function makeArrow(dir){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `mdp-arrow mdp-arrow--${dir}`;
+    btn.setAttribute('aria-label', dir === 'prev' ? 'Previous image' : 'Next image');
+    btn.innerHTML = dir === 'prev'
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="2" fill="#fff"/><polygon points="10,6 4,12 10,18" fill="#fff"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="11" width="12" height="2" fill="#fff"/><polygon points="14,6 20,12 14,18" fill="#fff"/></svg>';
+    return btn;
+  }
+  const prevBtn = makeArrow('prev');
+  const nextBtn = makeArrow('next');
+  viewer.append(prevBtn, nextBtn);
+
+  function goStepVisible(delta){
+    const vis = getVisibleIndices();
+    if (!vis.length) return;
+    const curPos = getActiveVisibleIndex();
+    let nextPos = (curPos + delta) % vis.length;
+    if (nextPos < 0) nextPos += vis.length;
+
+    // mark that user interacted, now we allow scrollIntoView
+    allowScrollIntoView = true; // <-- CHANGED (added)
+    goTo(vis[nextPos]);
+  }
+
+  prevBtn.addEventListener('click', () => {
+    allowScrollIntoView = true; // <-- CHANGED (added)
+    goStepVisible(-1);
+  });
+
+  nextBtn.addEventListener('click', () => {
+    allowScrollIntoView = true; // <-- CHANGED (added)
+    goStepVisible(1);
+  });
+
+  /* =========================================================
+     1) AUTOTAG THUMBNAILS BY FILENAME/ALT (pink|green)
+  ==========================================================*/
+  function inferColorsFromText(text){
+    const tokens = new Set();
+    const t = (text || '').toLowerCase();
+    if (/(^|[^a-z])green([^a-z]|$)/i.test(t)) tokens.add('green');
+    if (/(^|[^a-z])pink([^a-z]|$)/i.test(t))  tokens.add('pink');
+    return Array.from(tokens);
+  }
+
+  function ensureDataColorsOnThumbs(){
+    const items = Array.from(thumbsEl.querySelectorAll('.thumbnail-list__item'));
+    items.forEach(li => {
+      let colors = String(li.getAttribute('data-colors') || '').toLowerCase();
+      const img  = li.querySelector('img');
+      const hay  = (img?.alt || '') + ' ' + (img?.currentSrc || img?.src || '');
+      const inferred = inferColorsFromText(hay);
+      inferred.forEach(tok => {
+        const token = tok + '|';
+        if (!colors.includes(token)) colors += token;
+      });
+      if (colors) li.setAttribute('data-colors', colors);
+    });
+  }
+  ensureDataColorsOnThumbs();
+
+  /* =========================================================
+     2) FILTERING (strict for pink/green; show-all otherwise)
+  ==========================================================*/
+  function filterThumbsByColor(selectedColor, strictMode){
+    const items = Array.from(thumbsEl.querySelectorAll('.thumbnail-list__item'));
+    const color = (selectedColor || '').toLowerCase();
+    const strict = !!strictMode;
+
+    if (!color){
+      items.forEach(li => {
+        li.classList.remove('thumb-dim');
+        li.style.display = '';
+      });
+      return;
+    }
+
+    items.forEach(li => {
+      const colors = String(li.getAttribute('data-colors') || '').toLowerCase();
+      const match = colors.split('|').filter(Boolean).includes(color);
+      if (strict){
+        li.style.display = match ? '' : 'none';
+        li.classList.toggle('thumb-dim', false);
+      }else{
+        li.style.display = '';
+        li.classList.toggle('thumb-dim', !match);
+      }
+    });
+  }
+
+  function filterSlidesByColor(selectedColor, strictMode){
+    const color = (selectedColor || '').toLowerCase();
+    const strict = !!strictMode;
+
+    const thumbMap = new Map();
+    thumbsEl.querySelectorAll('.thumbnail-list__item').forEach(li => {
+      const mediaId = li.getAttribute('data-target');
+      const colors = String(li.getAttribute('data-colors') || '').toLowerCase();
+      const match = color ? colors.split('|').filter(Boolean).includes(color) : true;
+      thumbMap.set(mediaId, match);
+    });
+
+    slides.forEach(slide => {
+      const id = slide.getAttribute('data-media-id');
+      const match = thumbMap.get(id) ?? true;
+      if (!color){
+        slide.style.display = '';
+      }else{
+        slide.style.display = strict ? (match ? '' : 'none') : '';
+      }
+    });
+
+    // Ensure one visible slide is active
+    const visible = slides.filter(s => s.style.display !== 'none');
+    if (visible.length) {
+      const active = visible.find(s => s.classList.contains('is-active'));
+      if (!active) {
+        const idx = slides.indexOf(visible[0]);
+        if (idx >= 0) goTo(idx);
+      }
+    }
+  }
+
+  // Business rule:
+  // - If selected color is pink or green -> STRICT filter to that color only
+  // - Otherwise -> show all images (no filter)
+  function normalizeForRule(c){
+    const v = (c || '').toLowerCase().trim();
+    if (v.includes('pink'))  return 'pink';
+    if (v.includes('green')) return 'green';
+    return '';
+  }
+
+  function applyColorFilter(selectedColor){
+    const normalized = normalizeForRule(selectedColor);
+    const strict = !!normalized;
+    filterThumbsByColor(normalized, strict);
+    filterSlidesByColor(normalized, strict);
+    // Warm the first visible after filter
+    const firstVisibleIdx = slides.findIndex(s => s.style.display !== 'none');
+    if (firstVisibleIdx >= 0){
+      const img = getSlideImg(slides[firstVisibleIdx]);
+      promoteImage(img, 'high');
+      preloadImageOf(img);
+      warmNeighbors(firstVisibleIdx);
+    }
+  }
+
+  /* ====== Thumbnails: always clickable ====== */
+  thumbsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.thumbnail');
+    if (!btn) return;
+    const li = btn.closest('.thumbnail-list__item');
+    const mediaId = li?.getAttribute('data-target');
+    const idx = idToIndex[mediaId];
+    if (typeof idx === 'number') {
+      allowScrollIntoView = true; // <-- CHANGED (added)
+      goTo(idx);
+    }
+  });
+
+  function focusVariantThumbs(variant){
+    if (!thumbsEl || !variant) return;
+    const terms = [];
+    if (variant.title)   terms.push(...variant.title.split('/').map(s => s.trim().toLowerCase()));
+    if (variant.option1) terms.push(String(variant.option1).toLowerCase());
+    if (variant.option2) terms.push(String(variant.option2).toLowerCase());
+    if (variant.option3) terms.push(String(variant.option3).toLowerCase());
+
+    const items = Array.from(thumbsEl.querySelectorAll('.thumbnail-list__item'));
+    let bestItem = null, bestScore = -1;
+
+    items.forEach(li => {
+      li.classList.remove('thumb-dim');
+      const img = li.querySelector('img');
+      const txt = ((img?.alt || '') + ' ' + (img?.currentSrc || img?.src || '')).toLowerCase();
+      const variantTagged = li.classList.contains('thumbnail-list_item--variant') ? 1 : 0;
+      let hits = 0; for (const t of terms){ if (t && txt.includes(t)) hits++; }
+      const score = variantTagged * 100 + hits;
+      if (score > bestScore){ bestScore = score; bestItem = li; }
+    });
+
+    // This scrolls THUMBS rail, not window. Safe.
+    bestItem?.scrollIntoView({ block:'nearest', inline:'nearest' });
+  }
+
+  /* ====== React to variant changes ====== */
+  document.addEventListener('variant:change', (evt) => {
+    const v = evt?.detail?.variant;
+
+    // mark user interaction so now scroll is allowed
+    allowScrollIntoView = true; // <-- CHANGED (added)
+
+    // Jump viewer to the variant’s featured media
+    const mediaId = v?.featured_media?.id;
+    if (mediaId){
+      const domId = '{{ section.id }}-' + String(mediaId);
+      const idx = idToIndex[domId];
+      if (typeof idx === 'number') goTo(idx);
+    }
+
+    // Apply rule-based filtering
+    if (colorIndex > 0 && v) {
+      const selectedColor = String(v['option' + colorIndex] || '');
+      applyColorFilter(selectedColor);
+    }
+
+    focusVariantThumbs(v);
+  });
+
+  /* ====== Also react to direct option changes (safety net) ====== */
+  function extractColorFromTarget(t){
+    const name = (t.name || '').toLowerCase();
+    const idx  = t.dataset?.index;
+    const looksLikeColorName = name.includes('color') || name.includes('colour');
+    const isColorIndex = idx === ('option' + String(colorIndex));
+    return (looksLikeColorName || isColorIndex) ? (t.value || '') : '';
+  }
+
+  document.body.addEventListener('change', (e) => {
+    if (colorIndex <= 0) return;
+    const t = e.target;
+    if (!(t instanceof HTMLInputElement || t instanceof HTMLSelectElement)) return;
+    const maybeColor = extractColorFromTarget(t);
+    if (maybeColor) applyColorFilter(maybeColor);
+  }, { passive: true });
+
+  /* ====== Try an initial filter (if a Color is already selected) ====== */
+  (function initialFilter(){
+    if (colorIndex <= 0) return;
+    let input = document.querySelector(`input[type="radio"][data-index="option${colorIndex}"]:checked`);
+    if (!input) {
+      input = Array.from(document.querySelectorAll('input[type="radio"][name^="options["]'))
+        .find(el => (el.name || '').toLowerCase().includes('color') && el.checked);
+    }
+    let select = document.querySelector(`select[data-index="option${colorIndex}"]`) ||
+                 Array.from(document.querySelectorAll('select[name^="options["]'))
+                  .find(el => (el.name || '').toLowerCase().includes('color'));
+    const selectedColor = input?.value || select?.value || '';
+    applyColorFilter(selectedColor);
+  })();
+
+  /* ====== Mobile thumb rail progress ====== */
+  function ensureThumbsVisible(){
+    thumbsEl.className = thumbsEl.className.replace(/\bsmall-hide\b/g, '').trim();
+    thumbsEl.style.display = '';
+  }
+  ensureThumbsVisible();
+
+  function hideThumbArrows(){
+    thumbsEl.querySelectorAll('.slider-button').forEach(btn => { btn.style.display = 'none'; });
+  }
+  hideThumbArrows();
+
+  (function injectMobileThumbCSS(){
+    const id = 'thumbs-mobile-css-{{ section.id }}';
+    if (document.getElementById(id)) return;
+    const css = `
+      @media (max-width: 989px){
+        #Slider-Thumbnails-{{ section.id }}{
+          overflow-x: auto !important;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+          padding-bottom: 8px;
+        }
+        #Slider-Thumbnails-{{ section.id }}{ scrollbar-width: none !important; }
+        #Slider-Thumbnails-{{ section.id }}::-webkit-scrollbar{ display: none !important; width:0; height:0; }
+        #Slider-Thumbnails-{{ section.id }} > .slider__slide{ scroll-snap-align: start; }
+      }
+      #GalleryThumbnails-{{ section.id }} .nf-progress-track{ display:none; }
+      @media (max-width: 989px){
+        #GalleryThumbnails-{{ section.id }} .nf-progress-track{
+          display:block; position:relative; height:4px; background: rgba(0,0,0,.08);
+          border-radius: 999px; margin: 2px 12px 0; overflow:hidden;
+        }
+      }
+      #GalleryThumbnails-{{ section.id }} .nf-progress{
+        position:absolute; top:0; left:0; height:100%; width:70px;
+        background: rgba(0,0,0,.25); border-radius:999px; transform: translateX(0);
+        transition: transform .1s linear;
+      }
+    `;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = css;
+    document.head.appendChild(style);
+  })();
+
+  let progressTrack = thumbsEl.querySelector('.nf-progress-track');
+  if (!progressTrack){
+    progressTrack = document.createElement('div');
+    progressTrack.className = 'nf-progress-track';
+    thumbsUl.insertAdjacentElement('afterend', progressTrack);
+  }
+  let progress = progressTrack.querySelector('.nf-progress');
+  if (!progress){
+    progress = document.createElement('div');
+    progress.className = 'nf-progress';
+    progress.setAttribute('aria-hidden', 'true');
+    progressTrack.appendChild(progress);
+  }
+
+  function syncThumbBarVisibility(){
+    if (isMobile()){
+      thumbsUl.style.overflowX = 'auto';
+      progressTrack.style.display = 'block';
+    } else {
+      thumbsUl.style.overflowX = '';
+      progressTrack.style.display = 'none';
+    }
+  }
+  function moveThumbBar(){
+    if (!isMobile()){ progress && (progress.style.transform = 'translateX(0)'); return; }
+    const barWidth  = progress.offsetWidth || 70;
+    const viewW     = thumbsUl.clientWidth;
+    const contentW  = thumbsUl.scrollWidth;
+    const maxScroll = Math.max(1, contentW - viewW);
+    const ratio     = Math.min(1, Math.max(0, thumbsUl.scrollLeft / maxScroll));
+    const travel    = Math.max(0, (progressTrack.clientWidth - barWidth));
+    progress.style.transform = 'translateX(' + (ratio * travel) + 'px)';
+  }
+
+  thumbsUl.addEventListener('scroll', moveThumbBar, { passive:true });
+  window.addEventListener('resize', function(){
+    syncThumbBarVisibility();
+    clearTimeout(window.__pmg_rz);
+    window.__pmg_rz = setTimeout(moveThumbBar, 120);
+  });
+
+  thumbsUl.querySelectorAll('img').forEach(img => {
+    if (!img.complete){
+      img.addEventListener('load', () => requestAnimationFrame(moveThumbBar), { once:true });
+    }
+  });
+
+  // ===== Init =====
+  if (!slides.some(s => s.classList.contains('is-active'))) {
+    slides[0]?.classList.add('is-active');
+  }
+
+  // Warm current + neighbors on first paint
+  promoteImage(getSlideImg(slides[getActiveIndex()]), 'high');
+  warmNeighbors(getActiveIndex());
+
+  // On initial load we still call goTo(...) so active thumb highlights etc. are correct,
+  // BUT allowScrollIntoView is still false, so no page jump.
+  goTo(getActiveIndex());
+
+  syncThumbBarVisibility();
+  requestAnimationFrame(moveThumbBar);
+});
+</script>
+

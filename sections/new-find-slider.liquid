@@ -1,0 +1,238 @@
+{% schema %}
+{
+  "name": "New Find Slider",
+  "settings": [
+    { "type": "text", "id": "section_title", "label": "Title" }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Slider Item",
+      "settings": [
+        { "type": "image_picker", "id": "item_image", "label": "Image" },
+        { "type": "text", "id": "item_title", "label": "Title" },
+        { "type": "url", "id": "item_link", "label": "Link" },
+        { "type": "color", "id": "item_text_color", "label": "Text color", "default": "#333333" },
+        { "type": "color", "id": "image_bg", "label": "Image background", "default": "#f8f8f8" }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [{ "name": "New Find Slider", "category": "Custom" }]
+}
+{% endschema %}
+{%- assign sid = section.id -%}
+<div class="new-find-slider" id="nfs-{{ sid }}" data-sid="{{ sid }}">
+  <h2 class="slider-heading">{{ section.settings.section_title }}</h2>
+  <div class="slider-wrapper">
+    <button class="slider-arrow prev" aria-label="Previous">&#8592;</button>
+
+    <div class="slider-track" id="nfs-track-{{ sid }}">
+      {% for block in section.blocks %}
+        {% assign title_color = block.settings.item_text_color | default: '#333333' %}
+        {% assign img_bg = block.settings.image_bg | default: '#f8f8f8' %}
+        <a href="{{ block.settings.item_link | default: '#' }}" class="slider-item">
+          <div class="slider-image" style="background: {{ img_bg }};">
+            {% if block.settings.item_image %}
+              <img src="{{ block.settings.item_image | img_url: '400x400' }}" alt="{{ block.settings.item_title | escape }}">
+            {% endif %}
+          </div>
+          <span class="slider-title" style="color: {{ title_color }};">{{ block.settings.item_title }}</span>
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Always-visible custom progress bar (mobile only) -->
+    <div class="nf-progress" id="nfs-progress-{{ sid }}"></div>
+
+    <button class="slider-arrow next" aria-label="Next">&#8594;</button>
+  </div>
+</div>
+<style>
+:root { --nf-gap: 17px; }
+
+.new-find-slider { padding: 60px 0; max-width: 1300px; margin: 0 auto; }
+.slider-heading   { font-size: 30px; font-weight: 600; margin: 0 0 30px; }
+.slider-wrapper   { position: relative; align-items: center; }
+
+.slider-arrow{
+  background:#0f4264; color:#fff; border:none; border-radius:50%;
+  width:40px; height:40px; cursor:pointer; display:none;
+  align-items:center; justify-content:center; z-index:1;
+}
+
+/* Track (shared) */
+.slider-track{
+  display:flex; overflow-x:auto; gap:var(--nf-gap);
+  scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+  padding-bottom:16px; scrollbar-gutter:stable both-edges;
+  scrollbar-width:thin; scrollbar-color:#ccc transparent;
+}
+.slider-track::-webkit-scrollbar{ height:6px; background:rgba(0,0,0,.06); }
+.slider-track::-webkit-scrollbar-track{ background:rgba(0,0,0,.06); }
+.slider-track::-webkit-scrollbar-thumb{ background:#ccc; border-radius:10px; }
+
+.slider-item{ flex:1 0 auto; text-align:center; text-decoration:none; }
+.slider-image{
+  background:#f8f8f8; border-radius:12px; padding:10px; margin-bottom:8px;
+  display:flex; align-items:center; justify-content:center;
+}
+.slider-image img{ max-width:100%; height:auto; display:block; }
+.slider-title{ font-size:14px; font-weight:500; }
+
+/* Progress "thumb" — mobile only (moves horizontally as you scroll) */
+.nf-progress{
+  height: 4px;
+  width: 70px;                 /* requested fixed width */
+  margin-top: 10px;
+  background: #0f4264;         /* requested color */
+  border-radius: 999px;
+  display: none;               /* shown on mobile below */
+  transform: translateX(0);    /* we animate this */
+  transition: transform 160ms linear;
+}
+
+/* Mobile shows 1.5 cards → card = (100% - 0.5*gap)/1.5 */
+@media (max-width: 991px){
+  .slider-item{
+    flex:0 0 calc((100% - (var(--nf-gap)*0.5))/1.5);
+    max-width:calc((100% - (var(--nf-gap)*0.5))/1.5);
+  }
+  .slider-title{ font-size:16px; }
+  .new-find-slider{ padding:40px 13px; padding-bottom:0; }
+  .slider-heading{ font-size:22px; font-weight:600; margin-bottom:20px; font-family:'Inter', sans-serif !important; }
+
+  /* Use ONLY the custom thumb on mobile; hide native scrollbar */
+  .slider-track{ scrollbar-width:none; }
+  .slider-track::-webkit-scrollbar{ display:none; }
+  .nf-progress{ display:block !important; }
+}
+
+/* iOS contrast tweak (optional; keeps spacing consistent) */
+@supports (-webkit-touch-callout: none){
+  @media (max-width: 991px){ .nf-progress{ background:#186599; } }
+}
+
+/* Desktop (unchanged) */
+@media (min-width: 1000px){
+  .slider-item{
+    flex:0 0 calc((100% - (var(--nf-gap)*4))/5);
+    max-width:calc((100% - (var(--nf-gap)*4))/5);
+  }
+  .slider-arrow{ display:flex; position:absolute; top:40%; transform:translateY(-50%); }
+  .slider-arrow.prev{ left:-15px; }
+  .slider-arrow.next{ right:-15px; }
+}
+@media (min-width: 1024px){
+  .slider-track{ scrollbar-width:none; }
+  .slider-track::-webkit-scrollbar{ display:none; }
+}
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+  var root   = document.querySelector(".new-find-slider");
+  if (!root) return;
+
+  var slider = root.querySelector(".slider-track");
+  var prev   = root.querySelector(".slider-arrow.prev");
+  var next   = root.querySelector(".slider-arrow.next");
+  var items  = slider ? slider.querySelectorAll(".slider-item") : [];
+  var thumb  = root.querySelector(".nf-progress");
+  if (!slider || !prev || !next || !thumb || !items || items.length === 0) return;
+
+  var GAP = 17;
+
+  function isMobile(){ return window.innerWidth <= 991; }
+  function itemsPerView(){ return window.innerWidth >= 1024 ? 5 : 1.5; }
+
+  function getItemWidth(){
+    var r = items[0].getBoundingClientRect();
+    return (r ? r.width : 0) + GAP; // include gap for scroll step
+  }
+
+  function updateArrows(){
+    const isDesktop = window.innerWidth >= 1024;
+
+    // Hide both on mobile
+    if (!isDesktop) {
+      prev.style.display = "none";
+      next.style.display = "none";
+      return;
+    }
+
+    // Hide arrows entirely if few items
+    if (items.length <= 5) {
+      prev.style.display = "none";
+      next.style.display = "none";
+      return;
+    }
+
+    const scrollLeft = slider.scrollLeft;
+    const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+    // Show or hide arrows based on scroll position
+    if (scrollLeft <= 0) {
+      prev.style.visibility = "hidden";
+    } else {
+      prev.style.visibility = "visible";
+      prev.style.display = "flex";
+    }
+
+    if (scrollLeft >= maxScroll - 5) {
+      next.style.visibility = "visible";
+    } else {
+      next.style.visibility = "visible";
+      next.style.display = "flex";
+    }
+  }
+
+
+  // Move the blue thumb based on horizontal scroll
+  function moveThumb(){
+    if (!isMobile()) return; // thumb only on mobile
+    var barWidth   = thumb.offsetWidth;              // 70px
+    var viewportW  = slider.clientWidth;
+    var contentW   = slider.scrollWidth;
+    var maxScroll  = Math.max(1, contentW - viewportW);
+    var ratio      = Math.min(1, Math.max(0, slider.scrollLeft / maxScroll));
+
+    // Travel distance is track width minus the thumb width
+    var travel = Math.max(0, viewportW - barWidth);
+    var x = ratio * travel;
+
+    thumb.style.transform = "translateX(" + x + "px)";
+  }
+
+  // Arrow controls
+  prev.addEventListener("click", function(){
+    slider.scrollBy({ left: -(getItemWidth() * itemsPerView()), behavior: "smooth" });
+  });
+  next.addEventListener("click", function(){
+    slider.scrollBy({ left:  (getItemWidth() * itemsPerView()), behavior: "smooth" });
+  });
+
+  // Sync thumb with events
+  slider.addEventListener("scroll", moveThumb, { passive:true });
+  slider.addEventListener("scroll", updateArrows, { passive:true });
+  window.addEventListener("resize", function(){
+    updateArrows();
+    // let layout settle, then reposition thumb
+    requestAnimationFrame(moveThumb);
+  }, { passive:true });
+
+  // Reposition after images load (sizes may change)
+  var imgs = slider.querySelectorAll("img");
+  for (var i = 0; i < imgs.length; i++) {
+    if (!imgs[i].complete) {
+      imgs[i].addEventListener("load", function(){ requestAnimationFrame(moveThumb); }, { once:true });
+    }
+  }
+
+  // Initial paint
+  updateArrows();
+  requestAnimationFrame(moveThumb);
+});
+</script>
+

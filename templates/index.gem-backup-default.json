@@ -1,0 +1,1232 @@
+{
+  "sections": {
+    "featured_icons_PgKewQ": {
+      "type": "featured-icons",
+      "blocks": {
+        "icon_UmayiH": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/Untitled_design_78.png",
+            "icon_text": "New Arrivals",
+            "icon_link": "new-arrivals",
+            "icon_bg": "#fff7af",
+            "show_badge": true
+          }
+        },
+        "icon_k4m3FN": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/bestseller_1_d59a8d1f-9517-4697-b455-2e3bd6457d0f.png",
+            "icon_text": "Bestsellers",
+            "icon_link": "bestsellers",
+            "icon_bg": "#9ae6fe",
+            "show_badge": false
+          }
+        },
+        "icon_HPh4Tg": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/Untitled_design_9_13d51790-e6c0-4970-8132-24b88223b47c.png",
+            "icon_text": "Spin the Wheel",
+            "icon_link": "",
+            "icon_bg": "#b3f0c6",
+            "show_badge": false
+          }
+        },
+        "icon_U3Nt3N": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/top_44f42ab7-9989-430b-bde6-d977cb507199.png",
+            "icon_text": "Top Deals",
+            "icon_link": "top-deals",
+            "icon_bg": "#fed2df",
+            "show_badge": false
+          }
+        },
+        "icon_cnDkWe": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/120806212_9eafbbce-9ae5-4a97-b9d4-68d40e8cc3b2.png",
+            "icon_text": "Bed Rails",
+            "icon_link": "baby-bed-guard-rail",
+            "icon_bg": "#dbf1ff",
+            "show_badge": false
+          }
+        },
+        "icon_VQWmRA": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/Icons_For_Kids_Station_9fc96631-dfb2-4d7a-a6fb-fadb6c56c9a6.png",
+            "icon_text": "Potty Training",
+            "icon_link": "baby-potty-training-seat",
+            "icon_bg": "#bdfffb",
+            "show_badge": false
+          }
+        },
+        "icon_HAQLFU": {
+          "type": "icon",
+          "settings": {
+            "icon_image": "shopify:\/\/shop_images\/age-group_8b4d6ddf-471b-4b81-9e2e-c03aa9eea534.png",
+            "icon_text": "Shop by Age",
+            "icon_link": "",
+            "icon_bg": "#f1f3f5",
+            "show_badge": false
+          }
+        }
+      },
+      "block_order": [
+        "icon_UmayiH",
+        "icon_k4m3FN",
+        "icon_HPh4Tg",
+        "icon_U3Nt3N",
+        "icon_cnDkWe",
+        "icon_VQWmRA",
+        "icon_HAQLFU"
+      ],
+      "name": "Featured Icons Slider",
+      "settings": {}
+    },
+    "slideshow_V3pRXK": {
+      "type": "slideshow",
+      "blocks": {
+        "slide_kLnFax": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Pink_Banner_copy_917b5dcc-56e6-43cd-9eb3-6adfa3db73e2.webp",
+            "mobile_image": "shopify:\/\/shop_images\/Mobile_View_Pink_Banner.jpg",
+            "image_overlay_opacity": 0,
+            "heading": "",
+            "heading_size": "h1",
+            "subheading": "",
+            "button_label": "",
+            "link": "shopify:\/\/collections\/baby-carriers",
+            "button_style_secondary": false,
+            "show_text_box": false,
+            "box_align": "middle-center",
+            "text_alignment": "center",
+            "text_alignment_mobile": "center",
+            "color_scheme": ""
+          }
+        },
+        "slide_EVrGz9": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Spin_The_Wheel_Banner_copy_e18a749c-2aee-409c-8759-910db6e81e4c.webp",
+            "mobile_image": "shopify:\/\/shop_images\/Mobile_View_Spin_The_Wheel_Banner.jpg",
+            "image_overlay_opacity": 0,
+            "heading": "",
+            "heading_size": "h1",
+            "subheading": "",
+            "button_label": "",
+            "link": "",
+            "button_style_secondary": false,
+            "show_text_box": false,
+            "box_align": "middle-center",
+            "text_alignment": "center",
+            "text_alignment_mobile": "center",
+            "color_scheme": ""
+          }
+        },
+        "slide_Atf3g6": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Bedrail_Banner.jpg",
+            "mobile_image": "shopify:\/\/shop_images\/Mobile_View_BedRail_Banner_3911d2d1-cd03-4390-9b7a-8f1393929bbb.jpg",
+            "image_overlay_opacity": 0,
+            "heading": "",
+            "heading_size": "h1",
+            "subheading": "",
+            "button_label": "",
+            "link": "shopify:\/\/collections\/baby-bed-guard-rail",
+            "button_style_secondary": false,
+            "show_text_box": false,
+            "box_align": "middle-center",
+            "text_alignment": "center",
+            "text_alignment_mobile": "center",
+            "color_scheme": "scheme-1"
+          }
+        },
+        "slide_WiKNjP": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Shop_By_Age_Banner.jpg",
+            "mobile_image": "shopify:\/\/shop_images\/Mobile_View_Shop_By_Age_Banner.jpg",
+            "image_overlay_opacity": 0,
+            "heading": "",
+            "heading_size": "h1",
+            "subheading": "",
+            "button_label": "",
+            "link": "shopify:\/\/collections\/shop-by-age",
+            "button_style_secondary": false,
+            "show_text_box": false,
+            "box_align": "middle-center",
+            "text_alignment": "center",
+            "text_alignment_mobile": "center",
+            "color_scheme": "scheme-1"
+          }
+        }
+      },
+      "block_order": [
+        "slide_kLnFax",
+        "slide_EVrGz9",
+        "slide_Atf3g6",
+        "slide_WiKNjP"
+      ],
+      "name": "t:sections.slideshow.presets.name",
+      "settings": {
+        "layout": "full_bleed",
+        "slide_height": "adapt_image",
+        "slider_visual": "dots",
+        "auto_rotate": true,
+        "change_slides_speed": 5,
+        "image_behavior": "none",
+        "show_text_below": false,
+        "accessibility_info": "Slideshow about our brand"
+      }
+    },
+    "new_find_slider_FkJjBh": {
+      "type": "new-find-slider",
+      "blocks": {
+        "item_wJp8aW": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Feeding_Set_c703998f-b57a-4137-9990-23b004cdb834.webp",
+            "item_title": "Silicone Feeding Set",
+            "item_link": "shopify:\/\/collections\/silicone-food-feeders",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        },
+        "item_cLW7ze": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Bed_Rail.webp",
+            "item_title": "Bed Rail Guard",
+            "item_link": "shopify:\/\/collections\/baby-bed-guard-rail",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        },
+        "item_BqXcUk": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Safety_Gate.webp",
+            "item_title": "Retractable Safety Gate",
+            "item_link": "shopify:\/\/collections\/retractable-baby-safety-gate",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        },
+        "item_zyDWJa": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Bather.webp",
+            "item_title": "Baby Bather",
+            "item_link": "shopify:\/\/collections\/baby-bathers",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        },
+        "item_364bwT": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Playpen.webp",
+            "item_title": "Playpen Playard",
+            "item_link": "shopify:\/\/collections\/baby-playpen-playards",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        },
+        "item_M6YmD3": {
+          "type": "item",
+          "settings": {
+            "item_image": "shopify:\/\/shop_images\/Grooming_Kit.webp",
+            "item_title": "Grooming Kit",
+            "item_link": "shopify:\/\/collections\/baby-grooming-kit",
+            "item_text_color": "#333333",
+            "image_bg": "#f8f8f8"
+          }
+        }
+      },
+      "block_order": [
+        "item_wJp8aW",
+        "item_cLW7ze",
+        "item_BqXcUk",
+        "item_zyDWJa",
+        "item_364bwT",
+        "item_M6YmD3"
+      ],
+      "custom_css": [],
+      "name": "New Find Slider",
+      "settings": {
+        "section_title": "Shop New Finds For You"
+      }
+    },
+    "fresh_deals_hLkPCy": {
+      "type": "fresh-deals",
+      "blocks": {
+        "deal_XtVVkd": {
+          "type": "deal",
+          "settings": {
+            "deal_product": "",
+            "manual_title": "Baby Play Yards",
+            "manual_price": "Starting at ₹7999",
+            "manual_image": "shopify:\/\/shop_images\/ChatGPT_Image_Nov_11_2025_11_06_10_AM.png",
+            "manual_link": "shopify:\/\/collections\/baby-playpen-playards",
+            "manual_button_title": "Shop Now",
+            "bg_color": "#ffe8d5",
+            "title_color": "#000000",
+            "price_color": "#ff3b30",
+            "btn_bg": "#0f4264",
+            "btn_text": "#ffffff"
+          }
+        },
+        "deal_pakCgB": {
+          "type": "deal",
+          "settings": {
+            "deal_product": "",
+            "manual_title": "Bamboo Feeding Sets",
+            "manual_price": "Starting at ₹799",
+            "manual_image": "shopify:\/\/shop_images\/5e038e69-9e11-4da1-b5c6-26a0bf62d546.png",
+            "manual_link": "shopify:\/\/products\/kids-station™-grey-panda-wooden-baby-essential-feeding-set",
+            "manual_button_title": "Shop Now",
+            "bg_color": "#eaf4fb",
+            "title_color": "#000000",
+            "price_color": "#ff3b30",
+            "btn_bg": "#0f4264",
+            "btn_text": "#ffffff"
+          }
+        },
+        "deal_8qzNw6": {
+          "type": "deal",
+          "settings": {
+            "deal_product": "",
+            "manual_title": "Silicone Feeding Sets",
+            "manual_price": "Starting at ₹179",
+            "manual_image": "shopify:\/\/shop_images\/128646c2-f495-49f5-8852-c52a0cb11ffa.png",
+            "manual_link": "shopify:\/\/collections\/silicone-food-feeders",
+            "manual_button_title": "Shop Now",
+            "bg_color": "#fff3f3",
+            "title_color": "#000000",
+            "price_color": "#ff3b30",
+            "btn_bg": "#0f4264",
+            "btn_text": "#ffffff"
+          }
+        },
+        "deal_HfftMc": {
+          "type": "deal",
+          "settings": {
+            "deal_product": "",
+            "manual_title": "Baby Playmats",
+            "manual_price": "Starting at ₹1999",
+            "manual_image": "shopify:\/\/shop_images\/Untitled-100.jpg",
+            "manual_link": "shopify:\/\/collections\/baby-play-mat",
+            "manual_button_title": "Shop Now",
+            "bg_color": "#fff5e5",
+            "title_color": "#000000",
+            "price_color": "#ff3b30",
+            "btn_bg": "#0f4264",
+            "btn_text": "#ffffff"
+          }
+        }
+      },
+      "block_order": [
+        "deal_XtVVkd",
+        "deal_pakCgB",
+        "deal_8qzNw6",
+        "deal_HfftMc"
+      ],
+      "name": "Fresh Deals",
+      "settings": {
+        "section_title": "NEW LAUNCHES🎉",
+        "highlighted_title": "New Deals, Big Discounts",
+        "highlight_color": "#0f4264",
+        "highlight_bg": "#e6f9ff",
+        "desktop_columns": 3,
+        "mobile_mode": "carousel"
+      }
+    },
+    "countdown_banner_MTMda4": {
+      "type": "countdown-banner",
+      "name": "Countdown Banner",
+      "settings": {
+        "banner_text": "Hurry! These offers are valid for a limited time only",
+        "banner_link": "shopify:\/\/collections\/all",
+        "banner_link_text": "Shop all deals",
+        "bg_color": "#f7c542",
+        "text_color": "#000000",
+        "end_date": "2025-12-1 23:59:59"
+      }
+    },
+    "most_sold_with_promo_9ycAnz": {
+      "type": "most-sold-with-promo",
+      "blocks": {
+        "tab_UA43YG": {
+          "type": "tab",
+          "settings": {
+            "collection": "travel-time-essentials",
+            "title": "",
+            "limit": 20,
+            "promo_enable": true,
+            "promo_title": "10% Off Select Products",
+            "promo_sub": "Save 10% when you buy ₹2000 of select items.",
+            "promo_image": "shopify:\/\/shop_images\/3_side_pink_bedrail_with_pocket.png",
+            "promo_cta_label": "Explore",
+            "promo_cta_url": "shopify:\/\/products\/kids-station-made-in-india-foldable-and-portable-baby-bed-rail-guard-2-side-copy",
+            "promo_bg": "#eaf4fb",
+            "ad_slides": "1,3,5",
+            "ad_position": 3
+          }
+        },
+        "tab_pXwL7i": {
+          "type": "tab",
+          "settings": {
+            "collection": "baby-sleep-solutions",
+            "title": "",
+            "limit": 20,
+            "promo_enable": true,
+            "promo_title": "5% Off Select Products",
+            "promo_sub": "Save 5% when you buy ₹1000 of select items.",
+            "promo_image": "shopify:\/\/shop_images\/Group_1000001540.webp",
+            "promo_cta_label": "Explore",
+            "promo_cta_url": "shopify:\/\/products\/kids-station™-orange-3pcs-bib-bowl-and-spoon-baby-silicone-feeding-set",
+            "promo_bg": "#eaf4fb",
+            "ad_slides": "1,3,5,7",
+            "ad_position": 3
+          }
+        },
+        "tab_8dN3Vz": {
+          "type": "tab",
+          "settings": {
+            "collection": "little-ones-dining-tools",
+            "title": "",
+            "limit": 20,
+            "promo_enable": true,
+            "promo_title": "20% Off Select Products",
+            "promo_sub": "Save 20% when you buy ₹3000 of select items.",
+            "promo_image": "shopify:\/\/shop_images\/green_baby_carrier_Set-3_-8.jpg",
+            "promo_cta_label": "Explore",
+            "promo_cta_url": "shopify:\/\/products\/ergo-baby-4-in-1-cotton-baby-carrier-for-new-born-to-toddler",
+            "promo_bg": "#eaf4fb",
+            "ad_slides": "1,3,5",
+            "ad_position": 3
+          }
+        },
+        "tab_YaPBfq": {
+          "type": "tab",
+          "settings": {
+            "collection": "play",
+            "title": "",
+            "limit": 20,
+            "promo_enable": true,
+            "promo_title": "5% Off Select Products",
+            "promo_sub": "Save 5% when you buy ₹1000 of select items.",
+            "promo_image": "shopify:\/\/shop_images\/white_green_potty_seat_-7.png",
+            "promo_cta_label": "Explore",
+            "promo_cta_url": "shopify:\/\/products\/blue-baby-potty-training-seat",
+            "promo_bg": "#eaf4fb",
+            "ad_slides": "1,3,5",
+            "ad_position": 3
+          }
+        }
+      },
+      "block_order": [
+        "tab_UA43YG",
+        "tab_pXwL7i",
+        "tab_8dN3Vz",
+        "tab_YaPBfq"
+      ],
+      "name": "Most Sold",
+      "settings": {
+        "heading": "Most Sold This Week",
+        "desktop_cols": 4,
+        "text_color": "#1c6ea4",
+        "mobile_mode": "slider",
+        "mobile_cols": 2,
+        "mobile_slider_cards_per_view": "1.5",
+        "mobile_slider_show_scrollbar": true,
+        "badge_tags": ""
+      }
+    },
+    "collections_accordion_WipMQT": {
+      "type": "collections-accordion",
+      "blocks": {
+        "col_NbEzfn": {
+          "type": "col",
+          "settings": {
+            "collection": "baby-proofing",
+            "title": "",
+            "limit": 4
+          }
+        },
+        "col_hX3PQD": {
+          "type": "col",
+          "settings": {
+            "collection": "baby-silicone-feeding-essentials",
+            "title": "",
+            "limit": 4
+          }
+        },
+        "col_Cnntt7": {
+          "type": "col",
+          "settings": {
+            "collection": "indoor-gear",
+            "title": "",
+            "limit": 4
+          }
+        },
+        "col_MC9kNe": {
+          "type": "col",
+          "settings": {
+            "collection": "baby-care-and-hygiene",
+            "title": "",
+            "limit": 4
+          }
+        }
+      },
+      "block_order": [
+        "col_NbEzfn",
+        "col_hX3PQD",
+        "col_Cnntt7",
+        "col_MC9kNe"
+      ],
+      "name": "Collections Accordion",
+      "settings": {
+        "heading": "Don't Miss Our Products"
+      }
+    },
+    "it_feels_trending_MnXzhh": {
+      "type": "it-feels-trending",
+      "blocks": {
+        "trending_item_h9fGKD": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station-180-x-150-cm-baby-playpen-playard",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/3Rd Video 79Bcd373-Ee42-4299-A416-B53a94116e4a.mp4",
+            "views": "50k"
+          }
+        },
+        "trending_item_drXehp": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station-bed-rail-for-baby-safety-6ft-x-2-6ft-180cm-x-80cm-baby-safety-adjustable-height-foldable-safeguard-for-baby-proofing-king-size-bed-60-1-side-grey-old",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/ecoboostify-reel-manual-3ee84f6d-f21f-4575-a6b6-05fbd93da216.mp4",
+            "views": "120k"
+          }
+        },
+        "trending_item_BBH3nK": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station™-orange-3pcs-bib-bowl-and-spoon-baby-silicone-feeding-set",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/4Th Video_0139bc86-8dc3-4a60-be5d-79d293a70428.mp4",
+            "views": "250k"
+          }
+        },
+        "trending_item_dpDMyM": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station™-baby-proofing-finger-pinch-guard",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/AQNCFxDUsM9yBgHNA1vykLsHT0u6pzobsb9mKcQ6vtMPTdoF3GmPp-uBoAhtI00QoJLUhOMtdsbOUgFg9r9sOtN6ygwym6YRVmWdCvI.mp4",
+            "views": "190k"
+          }
+        },
+        "trending_item_EYaA4p": {
+          "type": "trending_item",
+          "settings": {
+            "product": "200-x-180-x-1-double-sided-waterproof-non-toxic-bpa-free-reversible-design-learning-crawling-foldable-foam-baby-play-mat-for-toddler-infant-kids",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/AQMpcPNCLQzopERrl-c3Zmq34g5Huy8nkAQZqzOjyatmRAza_hHLoTKUbmBMsVb7w30PuuFRxtB_jQvbSnWWRXxOLOHUw_gZ3nN4K9E.mp4",
+            "views": "330k"
+          }
+        },
+        "trending_item_qD4mGw": {
+          "type": "trending_item",
+          "settings": {
+            "product": "baby-feeding-bowl-and-spoon",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/2nd Video.mp4",
+            "views": "500k"
+          }
+        },
+        "trending_item_G8Vk6n": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station™-u-shape-brown-5-meters-edge-corner-protector-combo-pack",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/AQP9KNjbiuZ2fxAl-kfgU5nXOpZgHJvVTDISbTtvukRJe2CeO-8PA2DOlOpyxT34-sOGuc2tPPnxXOTUUe7yahqqpNVhAYc3QYfbh00.mp4",
+            "views": "900k"
+          }
+        },
+        "trending_item_rMdqc6": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station-7-in-1-baby-grooming-kit-2",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/AQPiwjTRyDqDgAFNMESxti46p7V3GWvIvdCexLUqBpAkNGZdODSVh9TnMHHOkDutTWsntaI1TjUBJgRAadxggpGBo6Z9ic9c7YRNskA.mp4",
+            "views": "700k"
+          }
+        },
+        "trending_item_JLKqkx": {
+          "type": "trending_item",
+          "settings": {
+            "product": "kids-station™-blue-rabbit-baby-bamboo-feeding-set",
+            "video_url": "",
+            "uploaded_video": "shopify:\/\/files\/videos\/1St Video V2_448703aa-f5d8-4953-90e4-f4e8fe21e5b0.mp4",
+            "views": "830k"
+          }
+        }
+      },
+      "block_order": [
+        "trending_item_h9fGKD",
+        "trending_item_drXehp",
+        "trending_item_BBH3nK",
+        "trending_item_dpDMyM",
+        "trending_item_EYaA4p",
+        "trending_item_qD4mGw",
+        "trending_item_G8Vk6n",
+        "trending_item_rMdqc6",
+        "trending_item_JLKqkx"
+      ],
+      "name": "#ItFeelsTrending",
+      "settings": {
+        "section_title": "#ItFeelsTrending",
+        "buy_bg": "#0f4264",
+        "title_color": "#000000",
+        "price_color": "#0f4264",
+        "card_bg": "#eaf3fb",
+        "views_bg": "#ffffff",
+        "views_text": "#000000"
+      }
+    },
+    "shop_the_look_YfX8rA": {
+      "type": "shop-the-look",
+      "blocks": {
+        "tile_iT4U9y": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Bed_Rail_a5e2f1cd-e18c-463e-be93-3470a7c728d3.webp",
+            "alt": "",
+            "spot1_enable": true,
+            "spot1_product": "kids-station-made-in-india-foldable-and-portable-baby-bed-rail-guard-2-side-copy",
+            "spot1_x": 20,
+            "spot1_y": 74,
+            "spot2_enable": true,
+            "spot2_product": "kids-station-7-in-1-baby-grooming-kit-2",
+            "spot2_x": 41,
+            "spot2_y": 40,
+            "spot3_enable": false,
+            "spot3_product": "",
+            "spot3_x": 47,
+            "spot3_y": 44,
+            "spot4_enable": false,
+            "spot4_product": "",
+            "spot4_x": 22,
+            "spot4_y": 80,
+            "spot5_enable": false,
+            "spot5_product": "",
+            "spot5_x": 80,
+            "spot5_y": 20,
+            "spot6_enable": false,
+            "spot6_product": "",
+            "spot6_x": 50,
+            "spot6_y": 50
+          }
+        },
+        "tile_U8XX3k": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Playpen_dec49de5-782a-4a8a-9aa1-551f33783d9b.webp",
+            "alt": "",
+            "spot1_enable": true,
+            "spot1_product": "kids-station-180-x-150-cm-baby-playpen-playard",
+            "spot1_x": 30,
+            "spot1_y": 81,
+            "spot2_enable": true,
+            "spot2_product": "baby-feeding-bowl-and-spoon",
+            "spot2_x": 46,
+            "spot2_y": 30,
+            "spot3_enable": false,
+            "spot3_product": "",
+            "spot3_x": 45,
+            "spot3_y": 45,
+            "spot4_enable": false,
+            "spot4_product": "",
+            "spot4_x": 20,
+            "spot4_y": 80,
+            "spot5_enable": false,
+            "spot5_product": "",
+            "spot5_x": 80,
+            "spot5_y": 20,
+            "spot6_enable": false,
+            "spot6_product": "",
+            "spot6_x": 50,
+            "spot6_y": 50
+          }
+        },
+        "tile_Urqpqf": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/Lock.webp",
+            "alt": "",
+            "spot1_enable": true,
+            "spot1_product": "kids-station-nylon-baby-safety-locks-made-in-india-secure-cabinets-drawers-copy-copy-copy-copy-copy",
+            "spot1_x": 20,
+            "spot1_y": 39,
+            "spot2_enable": false,
+            "spot2_product": "",
+            "spot2_x": 71,
+            "spot2_y": 68,
+            "spot3_enable": false,
+            "spot3_product": "",
+            "spot3_x": 45,
+            "spot3_y": 56,
+            "spot4_enable": false,
+            "spot4_product": "",
+            "spot4_x": 20,
+            "spot4_y": 80,
+            "spot5_enable": false,
+            "spot5_product": "",
+            "spot5_x": 80,
+            "spot5_y": 20,
+            "spot6_enable": false,
+            "spot6_product": "",
+            "spot6_x": 50,
+            "spot6_y": 50
+          }
+        },
+        "tile_ea9Nbt": {
+          "type": "tile",
+          "settings": {
+            "image": "shopify:\/\/shop_images\/nxak.png",
+            "alt": "",
+            "spot1_enable": true,
+            "spot1_product": "kids-station™-blue-silicone-non-slip-bpa-free-baby-feeding-set",
+            "spot1_x": 73,
+            "spot1_y": 32,
+            "spot2_enable": true,
+            "spot2_product": "copy-of-kids-station™-l-shape-50g-mt-extra-dense-baby-proofing-edge-corner-protector-combo-pack",
+            "spot2_x": 32,
+            "spot2_y": 61,
+            "spot3_enable": false,
+            "spot3_product": "",
+            "spot3_x": 45,
+            "spot3_y": 45,
+            "spot4_enable": false,
+            "spot4_product": "",
+            "spot4_x": 20,
+            "spot4_y": 80,
+            "spot5_enable": false,
+            "spot5_product": "",
+            "spot5_x": 80,
+            "spot5_y": 20,
+            "spot6_enable": false,
+            "spot6_product": "",
+            "spot6_x": 50,
+            "spot6_y": 50
+          }
+        }
+      },
+      "block_order": [
+        "tile_iT4U9y",
+        "tile_U8XX3k",
+        "tile_Urqpqf",
+        "tile_ea9Nbt"
+      ],
+      "name": "Shop Look",
+      "settings": {
+        "heading": "Shop The Look",
+        "subheading": "Introducing our exquisite collection: A symphony of safety and style, where your baby's safety and peace of mind takes the center stage.",
+        "row_height": 280
+      }
+    },
+    "featured_product_8UTFci": {
+      "type": "featured-product",
+      "blocks": {
+        "text_jikqXt": {
+          "type": "text",
+          "settings": {
+            "text": "Trending",
+            "text_style": "body"
+          }
+        },
+        "title_KRyHPV": {
+          "type": "title",
+          "settings": {
+            "heading_size": "h2"
+          }
+        },
+        "price_nDcd38": {
+          "type": "price",
+          "settings": {}
+        },
+        "judge_me_reviews_preview_badge_homepage_mkG4VD": {
+          "type": "shopify:\/\/apps\/judge-me-reviews\/blocks\/preview_badge_homepage\/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {
+            "product": "kids-station-made-in-india-baby-bed-rail-basic-60-1-side-grey"
+          }
+        },
+        "variant_picker_W7aeiq": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
+        },
+        "quantity_selector_GfXpYM": {
+          "type": "quantity_selector",
+          "settings": {}
+        },
+        "buy_buttons_GzgAXx": {
+          "type": "buy_buttons",
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": true
+          }
+        },
+        "share_emiE9K": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
+        }
+      },
+      "block_order": [
+        "text_jikqXt",
+        "title_KRyHPV",
+        "price_nDcd38",
+        "judge_me_reviews_preview_badge_homepage_mkG4VD",
+        "variant_picker_W7aeiq",
+        "quantity_selector_GfXpYM",
+        "buy_buttons_GzgAXx",
+        "share_emiE9K"
+      ],
+      "name": "t:sections.featured-product.presets.name",
+      "settings": {
+        "product": "kids-station-made-in-india-baby-bed-rail-basic-60-1-side-grey",
+        "gallery_layout": "thumbnail_slider",
+        "mobile_thumbnails": "show",
+        "color_scheme": "scheme-1",
+        "secondary_background": false,
+        "media_size": "small",
+        "constrain_to_viewport": true,
+        "media_fit": "contain",
+        "media_position": "left",
+        "image_zoom": "none",
+        "hide_variants": false,
+        "enable_video_looping": false,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "shop_by_brands_strip_taredE": {
+      "type": "shop-by-brands-strip",
+      "blocks": {
+        "brand_rtkTBE": {
+          "type": "brand",
+          "settings": {
+            "collection": "baby-proofing",
+            "image": "shopify:\/\/shop_images\/dxws.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "brand_EmXVtC": {
+          "type": "brand",
+          "settings": {
+            "collection": "indoor-gear",
+            "image": "shopify:\/\/shop_images\/xdbwsa.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "brand_ttgGpF": {
+          "type": "brand",
+          "settings": {
+            "collection": "outdoor-gear",
+            "image": "shopify:\/\/shop_images\/ChatGPT_Image_Oct_7_2025_at_09_00_50_PM.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "brand_7Uda3q": {
+          "type": "brand",
+          "settings": {
+            "collection": "nursery-and-furniture",
+            "image": "shopify:\/\/shop_images\/koiygv.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "brand_ptjW4r": {
+          "type": "brand",
+          "settings": {
+            "collection": "baby-silicone-feeding-essentials",
+            "image": "shopify:\/\/shop_images\/DSC01052.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "brand_dGEekB": {
+          "type": "brand",
+          "settings": {
+            "collection": "baby-care-and-hygiene",
+            "image": "shopify:\/\/shop_images\/DSC01052_3a005711-3b29-43ea-ab6c-e163436ff253.png",
+            "cta_label": "Shop Now",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        }
+      },
+      "block_order": [
+        "brand_rtkTBE",
+        "brand_EmXVtC",
+        "brand_ttgGpF",
+        "brand_7Uda3q",
+        "brand_ptjW4r",
+        "brand_dGEekB"
+      ],
+      "name": "Brand Slider",
+      "settings": {
+        "heading": "Shop by Categories",
+        "show_counts": true
+      }
+    },
+    "shop_by_phase_BcBhXR": {
+      "type": "shop-by-phase",
+      "blocks": {
+        "phase_KYW6mE": {
+          "type": "phase",
+          "settings": {
+            "title": "0 - 6 Months",
+            "collection": "0-6-months",
+            "link": "",
+            "image": "shopify:\/\/shop_images\/dxws_a_e82d1942-d85e-4e35-9c4f-fe79d8d0a913.png",
+            "alt": "",
+            "cta_label": "",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "phase_nWA3Fp": {
+          "type": "phase",
+          "settings": {
+            "title": "6 - 12 Months",
+            "collection": "6-12-months",
+            "link": "",
+            "image": "shopify:\/\/shop_images\/csnal.png",
+            "alt": "",
+            "cta_label": "",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "phase_yX7kEH": {
+          "type": "phase",
+          "settings": {
+            "title": "1 - 2 Years",
+            "collection": "1-2-years",
+            "link": "",
+            "image": "shopify:\/\/shop_images\/cwsaq.png",
+            "alt": "",
+            "cta_label": "",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        },
+        "phase_NtHnkF": {
+          "type": "phase",
+          "settings": {
+            "title": "2 - 5 Years",
+            "collection": "2-5-years",
+            "link": "",
+            "image": "shopify:\/\/shop_images\/dcmwl.png",
+            "alt": "",
+            "cta_label": "",
+            "cta_bg": "#ffffff",
+            "cta_text": "#111111",
+            "overlay_color": "#000000",
+            "overlay_strength": 15,
+            "grayscale": 0
+          }
+        }
+      },
+      "block_order": [
+        "phase_KYW6mE",
+        "phase_nWA3Fp",
+        "phase_yX7kEH",
+        "phase_NtHnkF"
+      ],
+      "name": "Shop by Phase",
+      "settings": {
+        "heading": "Shop by Age"
+      }
+    },
+    "custom_faq_section_rnVEqQ": {
+      "type": "custom-faq-section",
+      "blocks": {
+        "qa_eKhBPa": {
+          "type": "qa",
+          "settings": {
+            "q": "Are Kids Station's products safe for newborns?",
+            "a": "<p>Yes, absolutely. 👶 All Kids Station products are <strong>designed with newborn safety in mind<\/strong>. We use <strong>baby-safe, non-toxic materials<\/strong>, and test every product for <strong>comfort, stability, and hygiene,<\/strong> so parents can trust our products from day one.<\/p>"
+          }
+        },
+        "qa_FDdbJr": {
+          "type": "qa",
+          "settings": {
+            "q": "What is the return and exchange policy?",
+            "a": "<p>We want you to love what you order from Kids Station! 💛<\/p><p>If for any reason you’re <strong>not satisfied with the quality<\/strong>, you can <strong>return the product within 3 days of delivery<\/strong>.<\/p><p><strong>Please note:<\/strong><\/p><ul><li>The product must be <strong>unused<\/strong>, in its <strong>original packaging<\/strong>, with all parts and tags intact.<br\/><\/li><li>In such cases, the <strong>customer will need to cover the return shipping cost<\/strong>.<br\/><\/li><li>Once we receive and inspect the item, we’ll process your <strong>refund or replacement<\/strong> within <strong>5–7 business days<\/strong>.<br\/><\/li><\/ul><p>For any defective, damaged, or wrong products received, Kids Station will bear the replacement shipping costs.<\/p>"
+          }
+        },
+        "qa_gh3d4B": {
+          "type": "qa",
+          "settings": {
+            "q": "Are the bed rails covered under any warranty?",
+            "a": "<p>Yes, Kids Station Bed Rails come with a <strong>3-month warranty<\/strong> covering <strong>manufacturing defects in the frame<\/strong> (such as weld breaks, joint issues, or locking mechanism faults).<\/p>"
+          }
+        },
+        "qa_3gap7a": {
+          "type": "qa",
+          "settings": {
+            "q": "How can I make sure I order the correct bed rail size?",
+            "a": "<p>Please measure your <strong>mattress or inner bed dimensions<\/strong>, <strong>not the outer bed size<\/strong>.<br\/><br\/>Our bed rails are designed to fit securely based on the <strong>sleeping area (mattress size) <\/strong>not the wooden or metal frame around it.<\/p><p>🪄 <em>Tip:<\/em> Measure the <strong>length and width<\/strong> of your mattress from edge to edge in centimeters or feet before placing your order.<\/p>"
+          }
+        },
+        "qa_cD6PAX": {
+          "type": "qa",
+          "settings": {
+            "q": "Are your feeding products BPA-free?",
+            "a": "<p>Yes! 🍼 All Kids Station feeding products are <strong>100% BPA-free, phthalate-free, and made from food-grade, non-toxic materials<\/strong>. They are completely safe for babies and meet international safety standards for infant feeding.<\/p>"
+          }
+        },
+        "qa_ztF3wj": {
+          "type": "qa",
+          "settings": {
+            "q": "Is the baby carrier safe for newborns and toddlers both?",
+            "a": "<p>Yes! 👶 The Kids Station Baby Carrier is <strong>designed to grow with your baby<\/strong> from <strong>newborn (3 months)<\/strong> up to <strong>toddlers around 15 kg<\/strong>.<br\/><br\/>Made from <strong>breathable 100% cotton<\/strong>, it’s perfect for the Indian climate and gentle on your baby’s skin.<\/p>"
+          }
+        },
+        "qa_i4PmJ6": {
+          "type": "qa",
+          "settings": {
+            "q": "Are your products Made in India?",
+            "a": "<p>Yes! 🇮🇳 All Kids Station products are <strong>proudly Made in India<\/strong>.<br\/><br\/>Our designs are created specially for <strong>Indian parents and homes<\/strong>, keeping local needs, safety, and comfort in mind. We focus on <strong>quality manufacturing, thoughtful design, and baby-safe materials<\/strong> all crafted right here in India.<\/p>"
+          }
+        },
+        "qa_KHDJh7": {
+          "type": "qa",
+          "settings": {
+            "q": "How can I contact Kids Station support?",
+            "a": "<p>We’re always happy to help! 💛<br\/><br\/>You can reach our support team through:<\/p><ul><li><strong>WhatsApp:<\/strong> +91-9254021624<br\/><\/li><li><strong>Email:<\/strong> <a>support@kidstation.in<\/a><br\/><\/li><li>Or by filling out the <strong>Contact Form<\/strong> on our website: <a>www.kidstation.in<\/a><br\/><\/li><\/ul><p>Our team is available <strong>Monday to Saturday, 10 AM – 5 PM<\/strong>, to assist you with orders, installation, returns, or product questions.<\/p>"
+          }
+        }
+      },
+      "block_order": [
+        "qa_eKhBPa",
+        "qa_FDdbJr",
+        "qa_gh3d4B",
+        "qa_3gap7a",
+        "qa_cD6PAX",
+        "qa_ztF3wj",
+        "qa_i4PmJ6",
+        "qa_KHDJh7"
+      ],
+      "name": "FAQ with Image",
+      "settings": {
+        "heading": "Frequently",
+        "accent": "Asked Questions",
+        "image": "shopify:\/\/shop_images\/5_5efb838e-99d9-4a20-a57c-45b6c159d4f6.jpg",
+        "alt": "",
+        "bg": "#f4fbff"
+      }
+    },
+    "testimonials_slider_KfCQPN": {
+      "type": "testimonials-slider",
+      "blocks": {
+        "testimonial_aVtB4G": {
+          "type": "testimonial",
+          "settings": {
+            "photo": "shopify:\/\/shop_images\/71x2iDk9wUL._SL1600.jpg",
+            "mobile_photo": "shopify:\/\/shop_images\/71x2iDk9wUL._SL1600.jpg",
+            "title": "Easy to assemble",
+            "body": "<p>Recommend product for your baby’s safety. The product quality is very good and easy to assemble. In addition after I placed my order, I got support from the seller to confirm the size once again and for any installation support.<\/p>",
+            "name": "Raju Narayanan",
+            "role": "",
+            "platform": "amazon",
+            "rating": 5
+          }
+        },
+        "testimonial_AQmXJX": {
+          "type": "testimonial",
+          "settings": {
+            "photo": "shopify:\/\/shop_images\/71Qx1pHrvyL._SL1600.jpg",
+            "mobile_photo": "shopify:\/\/shop_images\/71Qx1pHrvyL._SL1600.jpg",
+            "title": "Worth Repurchasing",
+            "body": "<p>Very soft spoon. Easy to wash, easy to feed. Babies love it. Handle is sturdy. And good quality.<br\/>Colour is blue, very pretty. Amazing quality in this price, do buy without any doubt.<\/p>",
+            "name": "Aastha Yadav",
+            "role": "",
+            "platform": "google",
+            "rating": 4
+          }
+        },
+        "testimonial_aMJfkr": {
+          "type": "testimonial",
+          "settings": {
+            "photo": "shopify:\/\/shop_images\/71o3BJzAv8L._SL1600.jpg",
+            "mobile_photo": "shopify:\/\/shop_images\/71o3BJzAv8L._SL1600.jpg",
+            "title": "Outstanding Experience",
+            "body": "<p>Perfect, my kid loves to sit on it. Has got good grip, no accidents so far….. Good product. Quality is also good. Everyone should buy this. I am so happy with it. It is good for potty training.<\/p>",
+            "name": "Prasad",
+            "role": "",
+            "platform": "flipkart",
+            "rating": 5
+          }
+        },
+        "testimonial_QDHqze": {
+          "type": "testimonial",
+          "settings": {
+            "photo": "shopify:\/\/shop_images\/61ujcOnPo5L.jpg",
+            "mobile_photo": "shopify:\/\/shop_images\/61ujcOnPo5L.jpg",
+            "title": "Bye to sharp corners!",
+            "body": "<p>Yes, now Say bye to sharp corners for sure.. not only n the house of kids but it is a useful product for all.. no more pain or scratches by sharp corners.. easy to stick.. and adhesive is strong..<\/p>",
+            "name": "Vrinda Agarwal",
+            "role": "",
+            "platform": "amazon",
+            "rating": 5
+          }
+        },
+        "testimonial_9YXNhF": {
+          "type": "testimonial",
+          "settings": {
+            "photo": "shopify:\/\/shop_images\/61rFO6LB1CL.jpg",
+            "mobile_photo": "shopify:\/\/shop_images\/61rFO6LB1CL.jpg",
+            "title": "Built quality is Good.",
+            "body": "<p>The product has excellent build quality and is made from top-notch material, ensuring durability and comfort. It’s incredibly easy to clean and fully washable, making maintenance hassle-free. <\/p>",
+            "name": "Lincoln",
+            "role": "",
+            "platform": "meta",
+            "rating": 4
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_aVtB4G",
+        "testimonial_AQmXJX",
+        "testimonial_aMJfkr",
+        "testimonial_QDHqze",
+        "testimonial_9YXNhF"
+      ],
+      "name": "Testimonials Slider",
+      "settings": {
+        "heading": "What Our Customers Says!",
+        "bg": "#fff3f3"
+      }
+    },
+    "featured_blog_LEd97x": {
+      "type": "featured-blog",
+      "name": "t:sections.featured-blog.presets.name",
+      "settings": {
+        "blog": "blog-posts",
+        "post_limit": 3,
+        "heading": "Latest News",
+        "heading_size": "h1",
+        "columns_desktop": 3,
+        "show_view_all": false,
+        "show_image": true,
+        "show_date": true,
+        "show_author": true,
+        "color_scheme": "",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "newsletter_TfwVed": {
+      "type": "newsletter",
+      "blocks": {
+        "heading_zrpKLc": {
+          "type": "heading",
+          "settings": {
+            "heading": "Sign Up | Daily Updates",
+            "heading_size": "h1"
+          }
+        },
+        "paragraph_pFKaLn": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Sign up now for daily updates on exclusive content, news, and offers. Stay informed and never miss out! It's that easy. By subscribing you agree to our Terms & Conditions.<\/p>"
+          }
+        },
+        "email_form_A8PXin": {
+          "type": "email_form",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "heading_zrpKLc",
+        "paragraph_pFKaLn",
+        "email_form_A8PXin"
+      ],
+      "name": "t:sections.newsletter.presets.name",
+      "settings": {
+        "color_scheme": "",
+        "full_width": true,
+        "padding_top": 52,
+        "padding_bottom": 52
+      }
+    }
+  },
+  "order": [
+    "featured_icons_PgKewQ",
+    "slideshow_V3pRXK",
+    "new_find_slider_FkJjBh",
+    "fresh_deals_hLkPCy",
+    "countdown_banner_MTMda4",
+    "most_sold_with_promo_9ycAnz",
+    "collections_accordion_WipMQT",
+    "it_feels_trending_MnXzhh",
+    "shop_the_look_YfX8rA",
+    "featured_product_8UTFci",
+    "shop_by_brands_strip_taredE",
+    "shop_by_phase_BcBhXR",
+    "custom_faq_section_rnVEqQ",
+    "testimonials_slider_KfCQPN",
+    "featured_blog_LEd97x",
+    "newsletter_TfwVed"
+  ]
+}

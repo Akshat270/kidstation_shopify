@@ -1,0 +1,177 @@
+{% schema %}
+{
+  "name": "Countdown Banner",
+  "settings": [
+    {
+      "type": "text",
+      "id": "banner_text",
+      "label": "Banner Message",
+      "default": "Hurry! These offers are valid for a limited time only"
+    },
+    {
+      "type": "url",
+      "id": "banner_link",
+      "label": "Shop all deals link"
+    },
+    {
+      "type": "text",
+      "id": "banner_link_text",
+      "label": "Shop all deals link"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#F7C542"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End Date (YYYY-MM-DD HH:MM:SS)",
+      "default": "2025-12-31 23:59:59"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown Banner",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
+
+<div class="countdown-banner" style="background-color: {{ section.settings.bg_color }}; color: {{ section.settings.text_color }};">
+  <div class="countdown-inner">
+    <div class="countdown-text">
+      <span class="banner-msg">{{ section.settings.banner_text }}</span>
+      {% if section.settings.banner_link != blank %}
+        <a href="{{ section.settings.banner_link }}" class="banner-link">{{ section.settings.banner_link_text }}</a>
+      {% endif %}
+    </div>
+    <div class="countdown-timer" data-end="{{ section.settings.end_date }}">
+      <div class="time-box"><span class="time-num" id="days">00</span><span class="time-label">Days</span></div>
+      <div class="time-box"><span class="time-num" id="hours">00</span><span class="time-label">Hours</span></div>
+      <div class="time-box"><span class="time-num" id="minutes">00</span><span class="time-label">Mins</span></div>
+      <div class="time-box"><span class="time-num" id="seconds">00</span><span class="time-label">Secs</span></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.countdown-banner {
+  padding: 20px;
+  border-radius: 8px;
+  font-family: inherit;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.countdown-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.countdown-text {
+  font-size: 20px;
+  font-weight: 600;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.banner-link {
+  font-weight: 500;
+  text-decoration: underline !important;
+  color: inherit;
+}
+.countdown-timer {
+  display: flex;
+  gap: 14px;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+}
+.time-box {
+  text-align: center;
+  min-width: 55px;
+}
+.time-num {
+  font-size: 22px;
+  font-weight: 700;
+  display: block;
+}
+.time-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #444;
+}
+
+/* Mobile */
+@media (max-width: 767px) {
+  .countdown-inner {
+    display: flex !important;
+    align-items: flex-start;
+  }
+  .countdown-text {
+    font-size: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .countdown-text, .banner-link{
+    text-align: center;
+  }
+  .countdown-text{
+    align-items: center;
+  }
+  .countdown-timer{
+    width: 100%;
+    justify-content: center;
+  }
+  .countdown-banner{
+    margin: 0 16px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const timer = document.querySelector(".countdown-timer");
+  if (!timer) return;
+
+  const endDateStr = timer.getAttribute("data-end");
+  const endDate = new Date(endDateStr.replace(/-/g, "/")).getTime();
+
+  function updateTimer() {
+    const now = new Date().getTime();
+    const distance = endDate - now;
+
+    if (distance <= 0) {
+      timer.querySelector("#days").textContent = "00";
+      timer.querySelector("#hours").textContent = "00";
+      timer.querySelector("#minutes").textContent = "00";
+      timer.querySelector("#seconds").textContent = "00";
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    timer.querySelector("#days").textContent = days.toString().padStart(2, "0");
+    timer.querySelector("#hours").textContent = hours.toString().padStart(2, "0");
+    timer.querySelector("#minutes").textContent = minutes.toString().padStart(2, "0");
+    timer.querySelector("#seconds").textContent = seconds.toString().padStart(2, "0");
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+});
+</script>

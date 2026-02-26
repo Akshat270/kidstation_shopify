@@ -1,0 +1,222 @@
+{% comment %}
+  Why Shop With Us – Features + Ticker
+  - Top band: icon (image), heading, subtext. Responsive grid.
+  - Bottom band: left label + infinite-scrolling ticker items.
+{% endcomment %}
+{% assign ns = 'wswu-' | append: section.id %}
+
+<section class="{{ ns }}">
+  <div class="{{ ns }}__features-wrap" style="--band-bg: {{ section.settings.band_bg }}; --title-color: {{ section.settings.title_color }}; --sub-color: {{ section.settings.sub_color }};">
+    <div class="page-width">
+      <ul class="{{ ns }}__grid" style="--cols: {{ section.settings.columns_desktop }}; --gap: {{ section.settings.gap }}px">
+        {% for block in section.blocks %}
+          {% if block.type == 'feature' %}
+            <li class="{{ ns }}__item" {{ block.shopify_attributes }}>
+              <div class="{{ ns }}__icon">
+                {% if block.settings.icon != blank %}
+                  <img
+                    src="{{ block.settings.icon | image_url: width: 160 }}"
+                    alt="{{ block.settings.icon.alt | escape }}"
+                    loading="lazy" width="80" height="80">
+                {% else %}
+                  <span class="{{ ns }}__icon-fallback" aria-hidden="true">★</span>
+                {% endif %}
+              </div>
+              <div class="{{ ns }}__text">
+                <h3 class="{{ ns }}__title">{{ block.settings.heading | escape }}</h3>
+                {% if block.settings.subtext != blank %}
+                  <p class="{{ ns }}__sub">{{ block.settings.subtext }}</p>
+                {% endif %}
+              </div>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Ticker -->
+  <div class="{{ ns }}__ticker"
+       style="--ticker-bg: {{ section.settings.ticker_bg }}; --ticker-color: {{ section.settings.ticker_color }}; --badge-bg: {{ section.settings.badge_bg }}; --badge-color: {{ section.settings.badge_color }}; --speed: {{ section.settings.ticker_speed }}s;">
+    <div class="{{ ns }}__ticker-inner">
+      <div class="{{ ns }}__badge">{{ section.settings.badge_text }}</div>
+
+      <!-- two clones → seamless infinite loop -->
+      <div class="{{ ns }}__track" aria-label="Store benefits scrolling list">
+        <ul class="{{ ns }}__list">
+          {% for block in section.blocks %}
+            {% if block.type == 'ticker' and block.settings.text != blank %}
+              <li class="{{ ns }}__tick">{{ block.settings.text | escape }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        <ul class="{{ ns }}__list" aria-hidden="true">
+          {% for block in section.blocks %}
+            {% if block.type == 'ticker' and block.settings.text != blank %}
+              <li class="{{ ns }}__tick">{{ block.settings.text | escape }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .{{ ns }}{--radius: 12px}
+
+    /* ===== Top band ===== */
+    .{{ ns }}__features-wrap{
+      background: var(--band-bg, #2c6191);
+      color: var(--title-color, #fff);
+      padding: 28px 0 26px;
+    }
+    .{{ ns }}__grid{
+      list-style:none;margin:0;padding:0;
+      display:grid;grid-template-columns:repeat(var(--cols, 4), 1fr);
+      gap: var(--gap, 24px);
+      align-items:stretch;
+    }
+    .{{ ns }}__item{
+      display:flex;align-items:center;gap:16px;
+      padding:10px 12px;border-radius:var(--radius);
+    }
+    .{{ ns }}__icon{
+      flex:0 0 auto;width:88px;height:88px;border-radius:999px;
+      display:grid;place-items:center;background: {{ section.settings.background_image_color }}
+    }
+    .{{ ns }}__icon img{width:64px;height:64px;object-fit:contain}
+    .{{ ns }}__icon-fallback{font-size:28px;opacity:.4}
+    .{{ ns }}__text{min-width:0}
+    .{{ ns }}__title{margin:0 0 4px;font-size:20px;line-height:1.6;color:var(--title-color,#fff);font-weight:600;text-wrap:balance}
+    .{{ ns }}__sub{margin:0;color:var(--sub-color, #dbe7f3);font-size:14px;opacity:.95;font-weight:400;}
+
+    /* Desktop spacing tweak to match reference */
+    @media (min-width: 990px){
+      .{{ ns }}__icon{width:96px;height:96px}
+      .{{ ns }}__title{font-size:20px}
+      .{{ ns }}__sub{font-size:16px}
+      .{{ ns }}__item{
+        display:flex;align-items:center;gap:16px;
+        padding:10px 12px;border-radius:var(--radius);
+        flex-direction: column;text-align: center;
+      }
+    }
+
+    /* Mobile layout: stack items vertically with icon left like your screenshot */
+    @media (max-width: 989px){
+      .{{ ns }}__grid{grid-template-columns:1fr; gap:14px}
+      .{{ ns }}__item{padding:8px 10px}
+      .{{ ns }}__icon{width:72px;height:72px}
+      .{{ ns }}__icon img{width:52px;height:52px}
+      .{{ ns }}__title{font-size:15px}
+      .{{ ns }}__sub{font-size:13px}
+    }
+
+    /* ===== Ticker ===== */
+    .{{ ns }}__ticker{
+      background: var(--ticker-bg, #efc0c0);
+      color: var(--ticker-color, #171717);
+      overflow:hidden;
+    }
+    .{{ ns }}__ticker-inner{
+      display:flex;align-items:stretch;gap:0;
+      white-space:nowrap
+    }
+    .{{ ns }}__badge{
+      background: var(--badge-bg, #000);
+      color: var(--badge-color, #fff);
+      padding:14px 18px;
+      font-weight:600;
+      font-size: 16px;
+      flex: 0 0 auto;
+    }
+    .{{ ns }}__track{
+      position:relative;display:flex;flex:1 1 auto;min-width:0;
+      mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+    }
+    .{{ ns }}__list{
+      display:flex;align-items:center;gap:40px; 
+      animation: {{ ns }}-marquee var(--speed, 30s) linear infinite;
+    }
+    {% comment %} padding:14px 24px; {% endcomment %}
+    .{{ ns }}__list + .{{ ns }}__list{ margin-left:40px }
+    .{{ ns }}__tick{
+      font-weight:600;
+    }
+    @keyframes {{ ns }}-marquee{
+      from { transform: translateX(0) }
+      to   { transform: translateX(-100%) }
+    }
+    .{{ ns }}__ticker-inner:hover .{{ ns }}__list{ animation-play-state: paused }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .{{ ns }}__list{ animation: none }
+    }
+
+    /* Mobile ticker density like your mock: tighter gaps and smaller text */
+    @media (max-width: 989px){
+      .{{ ns }}__badge{ padding:12px 14px; font-size:14px }
+      .{{ ns }}__list{ gap:24px; }
+      .{{ ns }}__tick{ font-size:14px }
+    }
+  </style>
+
+  <script>
+    // Optional: restart marquee when fonts load to avoid jump
+    document.fonts?.ready?.then(() => {
+      const root = document.querySelector('.{{ ns }}');
+      if (!root) return;
+      root.querySelectorAll('.{{ ns }}__list').forEach(list=>{
+        list.style.animation = 'none';
+        // force reflow
+        void list.offsetWidth;
+        list.style.animation = '';
+      });
+    });
+  </script>
+
+  {% schema %}
+  {
+    "name": "Why Shop With Us",
+    "settings": [
+      { "type": "color", "id": "band_bg", "label": "Top band background", "default": "#2c6191" },
+      { "type": "color", "id": "background_image_color", "label": "image background", "default": "#fff" },
+      { "type": "color", "id": "title_color", "label": "Top band heading color", "default": "#ffffff" },
+      { "type": "color", "id": "sub_color", "label": "Top band subtext color", "default": "#dbe7f3" },
+      { "type": "range", "id": "columns_desktop", "min": 2, "max": 6, "step": 1, "default": 4, "label": "Features per row (desktop)" },
+      { "type": "range", "id": "gap", "min": 8, "max": 48, "step": 2, "default": 24, "label": "Grid gap (px)" },
+
+      { "type": "text", "id": "badge_text", "label": "Ticker left label", "default": "Why Shop With Us" },
+      { "type": "color", "id": "badge_bg", "label": "Label background", "default": "#000000" },
+      { "type": "color", "id": "badge_color", "label": "Label text color", "default": "#ffffff" },
+
+      { "type": "color", "id": "ticker_bg", "label": "Ticker background", "default": "#efc0c0" },
+      { "type": "color", "id": "ticker_color", "label": "Ticker text color", "default": "#111111" },
+      { "type": "range", "id": "ticker_speed", "label": "Ticker loop duration (sec)", "min": 10, "max": 60, "step": 1, "default": 30 }
+    ],
+    "blocks": [
+      {
+        "type": "feature",
+        "name": "Feature",
+        "settings": [
+          { "type": "image_picker", "id": "icon", "label": "Icon (circle)" },
+          { "type": "text", "id": "heading", "label": "Heading", "default": "100% Food Grade Silicone" },
+          { "type": "text", "id": "subtext", "label": "Subtext", "default": "BPA Free" }
+        ]
+      },
+      {
+        "type": "ticker",
+        "name": "Ticker item",
+        "settings": [
+          { "type": "text", "id": "text", "label": "Text", "default": "Trusted By 20k+ Parents" }
+        ]
+      }
+    ],
+    "presets": [
+      { "name": "Why Shop With Us", "category": "Custom" }
+    ]
+  }
+  {% endschema %}
+</section>
