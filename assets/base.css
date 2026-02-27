@@ -83,10 +83,17 @@ body {
 
 /* base */
 
+:root {
+  /* horizontal gutters used throughout the layout */
+  --gutter-mobile: 1.5rem;
+  --gutter-tablet: 5rem; /* adjust as needed (6rem suggested for larger screens) */
+  --gutter-desktop: 5rem;
+}
+
 .page-width {
   max-width: var(--page-width);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 var(--gutter-mobile);
 }
 
 body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
@@ -122,11 +129,12 @@ body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
   }
 
   .page-width-desktop {
-    padding: 0;
+    /* desktop variant should still provide a gutter; padding-zero causes the "no wall gap" issue */
+    padding: 0 var(--gutter-tablet);
   }
 
   .page-width-tablet {
-    padding: 0 5rem;
+    padding: 0 var(--gutter-tablet);
   }
 }
 
@@ -138,12 +146,25 @@ body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
 
   .page-width--narrow {
     max-width: 72.6rem;
-    padding: 0;
+    /* keep gutter even on narrow variant */
+    padding: 0 var(--gutter-desktop);
   }
 
   .page-width-desktop {
     max-width: var(--page-width);
-    padding: 0 5rem;
+    padding: 0 var(--gutter-desktop);
+  }
+}
+
+/* enforce gutters on every page-width container even if another rule tries to remove them */
+.page-width {
+  padding-left: var(--gutter-mobile) !important;
+  padding-right: var(--gutter-mobile) !important;
+}
+@media screen and (min-width: 750px) {
+  .page-width {
+    padding-left: var(--gutter-tablet) !important;
+    padding-right: var(--gutter-tablet) !important;
   }
 }
 
