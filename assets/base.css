@@ -169,39 +169,21 @@ body:has(.section-header .drawer-menu) .announcement-bar-section .page-width {
 }
 
 /* Add gutters to slideshow and slider components */
-slideshow-component,
-.slider-mobile-gutter {
-  padding-left: var(--gutter-mobile);
-  padding-right: var(--gutter-mobile);
-  display: block;
-}
-
-@media screen and (min-width: 750px) {
-  slideshow-component,
-  .slider-mobile-gutter {
-    padding-left: var(--gutter-tablet);
-    padding-right: var(--gutter-tablet);
-  }
-}
-
-/* Ensure all custom section wrappers maintain gutters */
-[class*="section"],
 .new-find-slider,
 .trending-section,
 .fresh-deals,
 .collections-accordion {
-  padding-left: var(--gutter-mobile);
-  padding-right: var(--gutter-mobile);
+  padding-left: var(--gutter-mobile) !important;
+  padding-right: var(--gutter-mobile) !important;
 }
 
 @media screen and (min-width: 750px) {
-  [class*="section"],
   .new-find-slider,
   .trending-section,
   .fresh-deals,
   .collections-accordion {
-    padding-left: var(--gutter-tablet);
-    padding-right: var(--gutter-tablet);
+    padding-left: var(--gutter-tablet) !important;
+    padding-right: var(--gutter-tablet) !important;
   }
 }
 
